@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { useLanguage } from '../../hooks/useLanguage'
 
 const LanguageToggle = () => {
@@ -15,13 +16,25 @@ const LanguageToggle = () => {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={toggleLanguage}
-      className="flex items-center justify-center p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+      className="flex items-center justify-center p-1 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors overflow-hidden"
       aria-label={ariaLabel}
       title={ariaLabel}
     >
       {language === 'pt' 
-        ? <span role="img" aria-label="Bandeira do Brasil">🇧🇷</span>
-        : <span role="img" aria-label="Bandeira dos Estados Unidos">🇺🇸</span>
+        ? <Image 
+            src="/icons/pt-br.png"
+            alt="Bandeira do Brasil"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
+        : <Image 
+            src="/icons/en.png"
+            alt="Bandeira dos Estados Unidos"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
       }
     </motion.button>
   )
