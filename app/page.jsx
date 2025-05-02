@@ -108,7 +108,7 @@ export default function Home() {
         onUpdateSettings={updateSettings}
       />
       
-      <div className="w-full text-center text-xs mt-8 opacity-70">
+      <div className="w-full text-center text-xs mt-8 opacity-70 hidden md:block">
         <p>{t('shortcuts')}</p>
         <p className="mt-1">
           <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
