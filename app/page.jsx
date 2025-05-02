@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import Controls from '../components/ui/Controls'
 import LanguageToggle from '../components/ui/LanguageToggle'
 import GradientText from '../components/ui/GradientText'
+import ClickSpark from '../components/ui/ClickSpark'
 import useTranslation from '../i18n/useTranslation'
 import useTimer from '../hooks/useTimer'
 
@@ -93,78 +94,88 @@ export default function Home() {
   if (!mounted) return null
 
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
-      {/* Particles Background */}
-      {mounted && (
-        <Particles 
-          particleCount={150}
-          particleSpread={15}
-          speed={0.05}
-          particleColors={["#3B82F6", "#8B5CF6", "#EC4899"]}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          alphaParticles={true}
-          particleBaseSize={80}
-        />
-      )}
-      
-      <div className="absolute top-4 right-4 z-10">
-        <LanguageToggle />
-      </div>
-      
-      <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center flex-grow gap-8">
-        <GradientText 
-          className="text-3xl font-bold" 
-          colors={["#3B82F6", "#8B5CF6", "#EC4899", "#8B5CF6", "#3B82F6"]}
-          animationSpeed={5}
-        >
-          DeepFocus
-        </GradientText>
+    <ClickSpark
+      sparkColors={["#3B82F6", "#8B5CF6", "#EC4899"]} // Blue, Purple, Pink
+      sparkSize={10}
+      sparkRadius={25}
+      sparkCount={12}
+      duration={650}
+      extraScale={1.2}
+      multiColor={true}
+    >
+      <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
+        {/* Particles Background */}
+        {mounted && (
+          <Particles 
+            particleCount={150}
+            particleSpread={15}
+            speed={0.05}
+            particleColors={["#3B82F6", "#8B5CF6", "#EC4899"]}
+            moveParticlesOnHover={true}
+            particleHoverFactor={0.5}
+            alphaParticles={true}
+            particleBaseSize={80}
+          />
+        )}
         
-        <div className="text-center">
-          <div className="mb-2 text-xl">
-            {mode === 'focus' && t('focus')}
-            {mode === 'shortBreak' && t('shortBreak')}
-            {mode === 'longBreak' && t('longBreak')}
-          </div>
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageToggle />
+        </div>
+        
+        <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center flex-grow gap-8">
+          <GradientText 
+            className="text-3xl font-bold" 
+            colors={["#3B82F6", "#8B5CF6", "#EC4899", "#8B5CF6", "#3B82F6"]}
+            animationSpeed={5}
+          >
+            DeepFocus
+          </GradientText>
           
-          {mode === 'focus' && (
-            <div className="text-sm mb-6">
-              {t('cycle')} {cycle}/{totalCycles}
+          <div className="text-center">
+            <div className="mb-2 text-xl">
+              {mode === 'focus' && t('focus')}
+              {mode === 'shortBreak' && t('shortBreak')}
+              {mode === 'longBreak' && t('longBreak')}
             </div>
-          )}
-          
-          <TimerDisplay time={time} />
+            
+            {mode === 'focus' && (
+              <div className="text-sm mb-6">
+                {t('cycle')} {cycle}/{totalCycles}
+              </div>
+            )}
+            
+            <TimerDisplay time={time} />
+          </div>
+
+          <Controls 
+            isActive={isActive}
+            onStart={startTimer}
+            onPause={pauseTimer}
+            onReset={resetTimer} 
+            onSkip={skipToNext}
+            onSettings={() => setIsSettingsOpen(true)}
+          />
         </div>
 
-        <Controls 
-          isActive={isActive}
-          onStart={startTimer}
-          onPause={pauseTimer}
-          onReset={resetTimer} 
-          onSkip={skipToNext}
-          onSettings={() => setIsSettingsOpen(true)}
+        <ConfigPanel 
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          settings={settings}
+          onUpdateSettings={updateSettings}
         />
-      </div>
-
-      <ConfigPanel 
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
-        onUpdateSettings={updateSettings}
-      />
-      
-      <div className="w-full text-center text-xs mt-8 opacity-70 hidden md:block">
-        <p>{t('shortcuts')}</p>
-        <p className="mt-1">
-          <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
-        </p>
-      </div>
-    </main>
+        
+        <div className="w-full text-center text-xs mt-8 opacity-70 hidden md:block">
+          <p>{t('shortcuts')}</p>
+          <p className="mt-1">
+            <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
+          </p>
+        </div>
+      </main>
+    </ClickSpark>
   )
 } 
