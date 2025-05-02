@@ -1,49 +1,38 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
-const TimerDisplay = ({ time, isActive }) => {
-  const hours = Math.floor(time / 3600)
-  const minutes = Math.floor((time % 3600) / 60)
-  const seconds = time % 60
+const TimerDisplay = ({ time }) => {
+  // Estado para armazenar o tempo formatado
+  const [displayTime, setDisplayTime] = useState("25:00")
   
-  const prevTimeRef = useRef({ hours, minutes, seconds })
-  
+  // Atualiza o tempo formatado quando o tempo muda
   useEffect(() => {
-    prevTimeRef.current = { hours, minutes, seconds }
-  }, [hours, minutes, seconds])
-
-  const formatDigit = (digit) => {
-    return digit.toString().padStart(2, '0')
-  }
-  
-  // Format time as 00:00:00 or 00:00 if hours is 0
-  const formattedTime = hours > 0 
-    ? `${formatDigit(hours)}:${formatDigit(minutes)}:${formatDigit(seconds)}`
-    : `${formatDigit(minutes)}:${formatDigit(seconds)}`
-
-  const containerVariants = {
-    active: {
-      scale: 1.05,
-      transition: { duration: 0.5, repeat: Infinity, repeatType: "reverse" }
-    },
-    inactive: {
-      scale: 1,
-      transition: { duration: 0.5 }
-    }
-  }
+    // Garantindo que time seja um número válido
+    const safeTime = typeof time === 'number' && !isNaN(time) ? time : 1500
+    
+    // Calculando horas, minutos e segundos
+    const hours = Math.floor(safeTime / 3600)
+    const minutes = Math.floor((safeTime % 3600) / 60)
+    const seconds = safeTime % 60
+    
+    // Formatando com zeros à esquerda
+    const formatDigit = digit => digit.toString().padStart(2, '0')
+    
+    // Formatando o tempo final
+    const formatted = hours > 0 
+      ? `${formatDigit(hours)}:${formatDigit(minutes)}:${formatDigit(seconds)}`
+      : `${formatDigit(minutes)}:${formatDigit(seconds)}`
+    
+    setDisplayTime(formatted)
+  }, [time])
 
   return (
-    <motion.div
-      variants={containerVariants}
-      animate={isActive ? "active" : "inactive"}
-      className="text-center"
-    >
+    <div className="text-center">
       <div className="text-[8vw] md:text-[5vw] font-mono font-bold tracking-wider transition-all duration-300">
-        {formattedTime}
+        {displayTime}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

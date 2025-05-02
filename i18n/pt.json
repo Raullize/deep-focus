@@ -20,5 +20,7 @@
   "spaceKey": "Espaço",
   "startPause": "Iniciar/Pausar",
   "next": "Próximo",
-  "shortcuts": "Atalhos de Teclado"
+  "shortcuts": "Atalhos de Teclado",
+  "resetToDefaults": "Restaurar Padrões",
+  "autoStartNextCycle": "Iniciar Próximo Ciclo Automaticamente"
 } 

@@ -4,12 +4,30 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useTranslation from '../../i18n/useTranslation'
 
+// Valores padrão para garantir que sempre tenhamos configurações válidas
+const DEFAULT_SETTINGS = {
+  focusTime: 25,
+  shortBreakTime: 5,
+  longBreakTime: 15,
+  cyclesPerRound: 4,
+  soundEnabled: true,
+  autoStartNextCycle: false,
+}
+
 const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
   const { t } = useTranslation()
-  const [localSettings, setLocalSettings] = useState(settings)
+  
+  // Garantir que temos um objeto settings válido e com valores padrão para propriedades ausentes
+  const safeSettings = { ...DEFAULT_SETTINGS, ...(settings || {}) }
+  
+  // Inicializar com os valores seguros
+  const [localSettings, setLocalSettings] = useState(safeSettings)
 
+  // Atualizar apenas quando temos configurações válidas
   useEffect(() => {
-    setLocalSettings(settings)
+    if (settings && typeof settings === 'object') {
+      setLocalSettings({ ...DEFAULT_SETTINGS, ...settings })
+    }
   }, [settings])
 
   const handleInputChange = (field, value) => {
@@ -19,11 +37,15 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
     }))
   }
 
-  const handleSoundToggle = () => {
+  const handleToggle = (field) => {
     setLocalSettings(prev => ({
       ...prev,
-      soundEnabled: !prev.soundEnabled
+      [field]: !prev[field]
     }))
+  }
+  
+  const handleResetToDefaults = () => {
+    setLocalSettings(DEFAULT_SETTINGS)
   }
 
   const handleSave = () => {
@@ -31,24 +53,28 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
     onClose()
   }
 
+  // Se não tivermos configurações válidas, não renderize
+  if (!localSettings) {
+    return null
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center"
+          onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 z-40"
-            onClick={onClose}
-          />
-          
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed bottom-0 left-0 right-0 bg-gray-900 rounded-t-2xl p-6 z-50 max-w-md mx-auto"
+            className="w-[90%] max-w-md bg-gray-900 rounded-2xl p-6 max-h-[90vh] overflow-y-auto shadow-xl"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-primary">{t('settings')}</h2>
@@ -100,23 +126,27 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
                 unit={t('cycles')}
               />
               
-              <div className="flex justify-between items-center py-2">
-                <label className="text-onBackground">{t('soundNotification')}</label>
-                <button 
-                  onClick={handleSoundToggle}
-                  className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors ${
-                    localSettings.soundEnabled ? 'bg-primary justify-end' : 'bg-gray-700 justify-start'
-                  }`}
-                >
-                  <motion.div 
-                    layout
-                    className="w-4 h-4 bg-white rounded-full"
-                  />
-                </button>
-              </div>
+              <ToggleItem 
+                label={t('soundNotification')}
+                isEnabled={localSettings.soundEnabled}
+                onToggle={() => handleToggle('soundEnabled')}
+              />
+              
+              <ToggleItem 
+                label={t('autoStartNextCycle')}
+                isEnabled={localSettings.autoStartNextCycle}
+                onToggle={() => handleToggle('autoStartNextCycle')}
+              />
             </div>
             
-            <div className="mt-8 flex justify-end">
+            <div className="mt-8 flex justify-between">
+              <button
+                onClick={handleResetToDefaults}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors"
+              >
+                {t('resetToDefaults')}
+              </button>
+              
               <button
                 onClick={handleSave}
                 className="px-6 py-2 bg-primary text-black rounded-lg font-medium hover:bg-primary/80 transition-colors"
@@ -125,37 +155,69 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
               </button>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   )
 }
 
 const SettingItem = ({ label, value, onChange, min, max, unit }) => {
+  // Gera um ID único para este campo específico
+  const id = `setting-${label.replace(/\s+/g, '-').toLowerCase()}`
+  
   return (
     <div className="flex flex-col py-2">
       <div className="flex justify-between items-center mb-2">
-        <label className="text-onBackground">{label}</label>
+        <label htmlFor={id} className="text-onBackground">{label}</label>
         <div className="flex items-center space-x-2">
           <input
+            id={id}
             type="number"
             value={value}
             onChange={onChange}
             min={min}
             max={max}
             className="w-16 px-2 py-1 rounded bg-gray-800 text-center focus:outline-none focus:ring-1 focus:ring-primary"
+            aria-label={`${label} (${min}-${max} ${unit})`}
           />
           <span className="text-sm text-gray-400">{unit}</span>
         </div>
       </div>
       <input
         type="range"
+        aria-labelledby={id}
         value={value}
         onChange={onChange}
         min={min}
         max={max}
         className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
       />
+    </div>
+  )
+}
+
+const ToggleItem = ({ label, isEnabled, onToggle }) => {
+  // Generate a unique ID for this toggle
+  const id = `toggle-${label.replace(/\s+/g, '-').toLowerCase()}`
+  
+  return (
+    <div className="flex justify-between items-center py-2">
+      <label htmlFor={id} className="text-onBackground">{label}</label>
+      <button 
+        id={id}
+        onClick={onToggle}
+        role="switch"
+        aria-checked={isEnabled}
+        aria-labelledby={id}
+        className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors ${
+          isEnabled ? 'bg-primary justify-end' : 'bg-gray-700 justify-start'
+        }`}
+      >
+        <motion.div 
+          layout
+          className="w-4 h-4 bg-white rounded-full"
+        />
+      </button>
     </div>
   )
 }

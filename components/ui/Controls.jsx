@@ -71,21 +71,19 @@ const Controls = ({ isActive, onStart, onPause, onReset, onSkip, onSettings }) =
   )
 }
 
-const ControlButton = ({ onClick, className, label, icon, small = false }) => {
-  return (
-    <motion.button
-      onClick={onClick}
-      whileTap={{ scale: 0.95 }}
-      whileHover={{ scale: 1.05 }}
-      className={`flex items-center justify-center rounded-full transition-colors ${
-        small ? 'p-2 text-sm' : 'p-3'
-      } ${className}`}
-      aria-label={label}
-    >
-      {icon}
-      {small && <span className="ml-2">{label}</span>}
-    </motion.button>
-  )
-}
+const ControlButton = ({ onClick, className, label, icon, small = false }) => (
+  <motion.button
+    onClick={onClick}
+    whileTap={{ scale: 0.95 }}
+    whileHover={{ scale: 1.05 }}
+    className={`flex items-center justify-center rounded-full transition-colors ${
+      small ? 'p-2 text-sm' : 'p-3'
+    } ${className}`}
+    aria-label={label}
+  >
+    {icon}
+    {small && <span className="ml-2">{label}</span>}
+  </motion.button>
+)
 
 export default Controls 

@@ -4,13 +4,13 @@ import { useLanguage } from '../hooks/useLanguage'
 import ptTranslations from './pt.json'
 import enTranslations from './en.json'
 
+const translations = {
+  pt: ptTranslations,
+  en: enTranslations
+}
+
 export default function useTranslation() {
   const { language } = useLanguage()
-  
-  const translations = {
-    pt: ptTranslations,
-    en: enTranslations
-  }
   
   const t = (key) => {
     // Get the translations for the current language

@@ -12,6 +12,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
+      <head>
+        {/* Metadados importantes para garantir renderização correta */}
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className={`${inter.className} bg-background text-onBackground`}>
         <LanguageProvider>
           {children}

@@ -5,9 +5,8 @@ import { useState, useEffect, createContext, useContext } from 'react'
 const LanguageContext = createContext(null)
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('pt') // Default to Portuguese
+  const [language, setLanguage] = useState('pt')
 
-  // Load language from localStorage on first render
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('language')
@@ -17,7 +16,6 @@ export function LanguageProvider({ children }) {
     }
   }, [])
 
-  // Save language to localStorage when it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', language)

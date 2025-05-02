@@ -1,17 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import TimerDisplay from '../components/ui/TimerDisplay'
+import dynamic from 'next/dynamic'
 import Controls from '../components/ui/Controls'
-import ConfigPanel from '../components/ui/ConfigPanel'
 import LanguageToggle from '../components/ui/LanguageToggle'
 import useTranslation from '../i18n/useTranslation'
 import useTimer from '../hooks/useTimer'
 
+// Importação dinâmica para evitar erros de hidratação
+const TimerDisplay = dynamic(() => import('../components/ui/TimerDisplay'), { ssr: false })
+const ConfigPanel = dynamic(() => import('../components/ui/ConfigPanel'), { ssr: false })
+
 export default function Home() {
+  const [mounted, setMounted] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const { t } = useTranslation()
+  const timer = useTimer()
   
+  // Extrair dados do timer
   const {
     time,
     mode,
@@ -24,33 +30,41 @@ export default function Home() {
     pauseTimer,
     resetTimer,
     skipToNext
-  } = useTimer()
+  } = timer
 
-  // Keyboard shortcuts
+  // Montar componente
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Atalhos de teclado
+  useEffect(() => {
+    if (!mounted) return
+    
     const handleKeyPress = (e) => {
-      // Space - Start/Pause
-      if (e.code === 'Space') {
-        e.preventDefault()
-        isActive ? pauseTimer() : startTimer()
-      }
-      // R - Reset
-      if (e.code === 'KeyR') {
-        resetTimer()
-      }
-      // N - Next
-      if (e.code === 'KeyN') {
-        skipToNext()
-      }
-      // S - Settings
-      if (e.code === 'KeyS') {
-        setIsSettingsOpen(prev => !prev)
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault()
+          isActive ? pauseTimer() : startTimer()
+          break
+        case 'KeyR':
+          resetTimer()
+          break
+        case 'KeyN':
+          skipToNext()
+          break
+        case 'KeyS':
+          setIsSettingsOpen(prev => !prev)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer])
+  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted])
+
+  // Não renderiza nada até estar montado no cliente
+  if (!mounted) return null
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-6 relative">
@@ -68,15 +82,13 @@ export default function Home() {
             {mode === 'longBreak' && t('longBreak')}
           </div>
           
-          <div className="text-sm mb-6">
-            {mode === 'focus' && (
-              <span>
-                {t('cycle')} {cycle}/{totalCycles}
-              </span>
-            )}
-          </div>
+          {mode === 'focus' && (
+            <div className="text-sm mb-6">
+              {t('cycle')} {cycle}/{totalCycles}
+            </div>
+          )}
           
-          <TimerDisplay time={time} isActive={isActive} />
+          <TimerDisplay time={time} />
         </div>
 
         <Controls 
