@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Controls from '../components/ui/Controls'
 import LanguageToggle from '../components/ui/LanguageToggle'
+import GradientText from '../components/ui/GradientText'
 import useTranslation from '../i18n/useTranslation'
 import useTimer from '../hooks/useTimer'
 
@@ -97,7 +98,13 @@ export default function Home() {
       </div>
       
       <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center flex-grow gap-8">
-        <h1 className="text-3xl font-bold text-primary">DeepFocus</h1>
+        <GradientText 
+          className="text-3xl font-bold" 
+          colors={["#3B82F6", "#8B5CF6", "#EC4899", "#8B5CF6", "#3B82F6"]}
+          animationSpeed={5}
+        >
+          DeepFocus
+        </GradientText>
         
         <div className="text-center">
           <div className="mb-2 text-xl">
