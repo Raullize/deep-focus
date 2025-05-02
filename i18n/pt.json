@@ -22,5 +22,7 @@
   "next": "Próximo",
   "shortcuts": "Atalhos de Teclado",
   "resetToDefaults": "Restaurar Padrões",
-  "autoStartNextCycle": "Iniciar Próximo Ciclo Automaticamente"
+  "autoStartNextCycle": "Iniciar Próximo Ciclo Automaticamente",
+  "fullscreen": "Tela Cheia",
+  "closeModal": "Fechar Modal"
 } 

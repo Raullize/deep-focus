@@ -14,6 +14,7 @@ const ConfigPanel = dynamic(() => import('../components/ui/ConfigPanel'), { ssr:
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const { t } = useTranslation()
   const timer = useTimer()
   
@@ -56,12 +57,35 @@ export default function Home() {
         case 'KeyS':
           setIsSettingsOpen(prev => !prev)
           break
+        case 'KeyF':
+          toggleFullscreen()
+          break
+        case 'Escape':
+          if (isSettingsOpen) {
+            setIsSettingsOpen(false)
+          }
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted])
+  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted, isSettingsOpen])
+
+  // Função para alternar modo tela cheia
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log(`Erro ao tentar entrar em modo tela cheia: ${err.message}`)
+      })
+      setIsFullscreen(true)
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    }
+  }
 
   // Não renderiza nada até estar montado no cliente
   if (!mounted) return null
@@ -114,7 +138,9 @@ export default function Home() {
           <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
           <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
           <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
-          <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')}
+          <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
+          <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
+          <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
         </p>
       </div>
     </main>

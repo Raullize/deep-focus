@@ -22,5 +22,7 @@
   "next": "Next",
   "shortcuts": "Keyboard Shortcuts",
   "resetToDefaults": "Reset to Defaults",
-  "autoStartNextCycle": "Auto-Start Next Cycle"
+  "autoStartNextCycle": "Auto-Start Next Cycle",
+  "fullscreen": "Fullscreen",
+  "closeModal": "Close Modal"
 } 

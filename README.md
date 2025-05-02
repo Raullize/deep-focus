@@ -26,6 +26,8 @@ DeepFocus é um aplicativo moderno de timer Pomodoro que ajuda os usuários a se
 - **R**: Reiniciar o timer atual
 - **N**: Pular para o próximo ciclo
 - **S**: Abrir/Fechar configurações
+- **F**: Entrar/Sair do modo tela cheia
+- **ESC**: Fechar o modal de configurações
 
 ## Desenvolvimento
 
