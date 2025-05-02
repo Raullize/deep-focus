@@ -11,6 +11,7 @@ import useTimer from '../hooks/useTimer'
 // Importação dinâmica para evitar erros de hidratação
 const TimerDisplay = dynamic(() => import('../components/ui/TimerDisplay'), { ssr: false })
 const ConfigPanel = dynamic(() => import('../components/ui/ConfigPanel'), { ssr: false })
+const Particles = dynamic(() => import('../components/ui/Particles'), { ssr: false })
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
@@ -92,8 +93,22 @@ export default function Home() {
   if (!mounted) return null
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-6 relative">
-      <div className="absolute top-4 right-4">
+    <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
+      {/* Particles Background */}
+      {mounted && (
+        <Particles 
+          particleCount={150}
+          particleSpread={15}
+          speed={0.05}
+          particleColors={["#3B82F6", "#8B5CF6", "#EC4899"]}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          alphaParticles={true}
+          particleBaseSize={80}
+        />
+      )}
+      
+      <div className="absolute top-4 right-4 z-10">
         <LanguageToggle />
       </div>
       

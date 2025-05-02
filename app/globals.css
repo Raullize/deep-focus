@@ -7,11 +7,21 @@
   --background-rgb: 18, 18, 18;
 }
 
+html, body {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
   min-height: 100vh;
+  max-height: 100vh;
   overflow-x: hidden;
+  position: fixed;
 }
 
 /* Number input styling */
