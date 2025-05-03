@@ -24,6 +24,7 @@ export default function Home() {
   // Extrair dados do timer
   const {
     time,
+    totalTime,
     mode,
     isActive,
     cycle,
@@ -144,7 +145,11 @@ export default function Home() {
               </div>
             )}
             
-            <TimerDisplay time={time} />
+            <TimerDisplay 
+              time={time} 
+              totalTime={totalTime}
+              mode={mode}
+            />
           </div>
 
           <Controls 
