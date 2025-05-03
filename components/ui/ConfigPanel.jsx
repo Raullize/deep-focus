@@ -133,6 +133,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          key="config-panel-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -140,6 +141,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
+            key="config-panel-content"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -252,6 +254,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
       <AnimatePresence>
         {isResetModalOpen && (
           <motion.div
+            key="reset-confirm-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -259,6 +262,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
             onClick={(e) => e.target === e.currentTarget && cancelReset()}
           >
             <motion.div
+              key="reset-confirm-content"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -331,14 +335,14 @@ const ToggleItem = ({ label, isEnabled, onToggle }) => {
   const id = `toggle-${label.replace(/\s+/g, '-').toLowerCase()}`
   
   return (
-    <div className="flex justify-between items-center py-2">
-      <label htmlFor={id} className="text-onBackground">{label}</label>
+    <div className="flex justify-between items-center py-2" onClick={onToggle}>
+      <label className="text-onBackground cursor-pointer">{label}</label>
       <button 
         id={id}
-        onClick={onToggle}
+        type="button"
         role="switch"
         aria-checked={isEnabled}
-        aria-labelledby={id}
+        aria-label={label}
         className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors ${
           isEnabled ? 'bg-primary justify-end' : 'bg-gray-700 justify-start'
         }`}
@@ -358,7 +362,7 @@ const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
   
   return (
     <div className="flex flex-col py-2">
-      <label htmlFor={id} className="text-onBackground mb-2">{label}</label>
+      <div className="text-onBackground mb-2">{label}</div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
         {options.map((option) => (
           <div key={option.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-2">
