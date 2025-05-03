@@ -9,7 +9,8 @@ const DEFAULT_SETTINGS = {
   cyclesPerRound: 4,
   soundEnabled: true,
   autoStartNextCycle: false,
-  notificationSound: 'notification1'
+  notificationSound: 'notification1',
+  showKeyboardShortcuts: true,
 }
 
 const TIMER_MODES = {

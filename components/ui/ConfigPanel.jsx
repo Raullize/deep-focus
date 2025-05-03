@@ -13,14 +13,23 @@ const DEFAULT_SETTINGS = {
   soundEnabled: true,
   autoStartNextCycle: false,
   notificationSound: 'notification1',
+  showKeyboardShortcuts: true,
 }
 
 // Lista de sons disponíveis
 const NOTIFICATION_SOUNDS = [
-  { id: 'notification1', name: 'Notification 1' },
-  { id: 'notification10', name: 'Notification 2' },
-  { id: 'notification11', name: 'Notification 3' },
-  { id: 'notification12', name: 'Notification 4' },
+  { id: 'notification1', name: 'Notificação 1' },
+  { id: 'notification10', name: 'Notificação 2' },
+  { id: 'notification11', name: 'Notificação 3' },
+  { id: 'notification12', name: 'Notificação 4' },
+  { id: 'notification2', name: 'Notificação 5' },
+  { id: 'notification3', name: 'Notificação 6' },
+  { id: 'notification4', name: 'Notificação 7' },
+  { id: 'notification5', name: 'Notificação 8' },
+  { id: 'notification6', name: 'Notificação 9' },
+  { id: 'notification7', name: 'Notificação 10' },
+  { id: 'notification8', name: 'Notificação 11' },
+  { id: 'notification9', name: 'Notificação 12' },
 ]
 
 const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
@@ -191,6 +200,15 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
                 isEnabled={localSettings.autoStartNextCycle}
                 onToggle={() => handleToggle('autoStartNextCycle')}
               />
+              
+              {/* Opção para mostrar/ocultar atalhos de teclado (apenas na versão desktop) */}
+              <div className="hidden md:block">
+                <ToggleItem 
+                  label={t('showKeyboardShortcuts')}
+                  isEnabled={localSettings.showKeyboardShortcuts}
+                  onToggle={() => handleToggle('showKeyboardShortcuts')}
+                />
+              </div>
             </div>
             
             <div className="mt-8 flex justify-between">
@@ -283,9 +301,9 @@ const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
   return (
     <div className="flex flex-col py-2">
       <label htmlFor={id} className="text-onBackground mb-2">{label}</label>
-      <div className="flex flex-col space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
         {options.map((option) => (
-          <div key={option.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+          <div key={option.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-2">
             <div className="flex items-center">
               <input
                 type="radio"
@@ -294,7 +312,7 @@ const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
                 value={option.id}
                 checked={value === option.id}
                 onChange={() => onChange(option.id)}
-                className="mr-3"
+                className="mr-2"
               />
               <label htmlFor={`${id}-${option.id}`} className="text-sm">
                 {option.name}
@@ -303,7 +321,7 @@ const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
             <button
               type="button"
               onClick={() => onTest(option.id)}
-              className="p-2 text-xs bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              className="p-1 ml-2 text-xs bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
               aria-label={`Testar som ${option.name}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">

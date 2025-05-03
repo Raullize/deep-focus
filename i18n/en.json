@@ -18,6 +18,7 @@
   "cycles": "cycles",
   "soundNotification": "Sound Notification",
   "notificationSound": "Choose Sound",
+  "showKeyboardShortcuts": "Show Keyboard Shortcuts",
   "spaceKey": "Space",
   "startPause": "Start/Pause",
   "next": "Next",
@@ -25,5 +26,5 @@
   "resetToDefaults": "Reset to Defaults",
   "autoStartNextCycle": "Auto-Start Next Cycle",
   "fullscreen": "Fullscreen",
-  "closeModal": "Close Modal"
+  "closeModal": "Close Settings"
 } 

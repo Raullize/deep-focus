@@ -169,18 +169,20 @@ export default function Home() {
           onUpdateSettings={updateSettings}
         />
         
-        {/* Atalhos de teclado para desktop */}
-        <div className="w-full text-center text-xs mt-4 mb-0 opacity-70 hidden md:block">
-          <p className="mb-1">{t('shortcuts')}</p>
-          <p>
-            <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
-          </p>
-        </div>
+        {/* Atalhos de teclado para desktop - apenas se habilitado nas configurações */}
+        {settings.showKeyboardShortcuts && (
+          <div className="w-full text-center text-xs mt-4 mb-0 opacity-70 hidden md:block">
+            <p className="mb-1">{t('shortcuts')}</p>
+            <p>
+              <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
+            </p>
+          </div>
+        )}
         
         {/* Atalhos de teclado para mobile (mais compactos) */}
         <div className="w-full text-center text-xs mt-2 mb-0 opacity-70 md:hidden">
