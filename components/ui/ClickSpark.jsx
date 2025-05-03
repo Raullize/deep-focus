@@ -1,21 +1,24 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
+const DEFAULT_SPARK_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"]; // Blue, Purple, Pink
+
 const ClickSpark = ({
   sparkColor = "#fff",
-  sparkColors = ["#3B82F6", "#8B5CF6", "#EC4899"], // Blue, Purple, Pink by default
+  sparkColors = DEFAULT_SPARK_COLORS,
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
   duration = 400,
   easing = "ease-out",
   extraScale = 1.0,
-  multiColor = false, // New prop to toggle between single color and multi-color
+  multiColor = false,
   children
 }) => {
   const canvasRef = useRef(null);
-  const sparksRef = useRef([]); // Stores spark data
-  const startTimeRef = useRef(null); // Tracks initial timestamp for animation
+  const sparksRef = useRef([]);
+  const startTimeRef = useRef(null);
 
+  // Setup canvas dimensions and responsive behavior
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -35,101 +38,96 @@ const ClickSpark = ({
 
     const handleResize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resizeCanvas, 100); // Debounce by 100ms
+      resizeTimeout = setTimeout(resizeCanvas, 100);
     };
 
-    // Observe size changes
     const ro = new ResizeObserver(handleResize);
     ro.observe(parent);
-
-    // Initial sizing
+    
     resizeCanvas();
 
-    // Cleanup
     return () => {
       ro.disconnect();
       clearTimeout(resizeTimeout);
     };
   }, []);
 
+  // Easing function for spark animation
+  const easeFunc = useCallback((t) => {
+    switch (easing) {
+      case "linear":
+        return t;
+      case "ease-in":
+        return t * t;
+      case "ease-in-out":
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      default:
+        return t * (2 - t); // ease-out
+    }
+  }, [easing]);
 
-  const easeFunc = useCallback(
-    (t) => {
-      switch (easing) {
-        case "linear":
-          return t;
-        case "ease-in":
-          return t * t;
-        case "ease-in-out":
-          return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        default:
-          return t * (2 - t);
-      }
-    },
-    [easing]
-  );
-
+  // Draw animation frames
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animationId;
 
+    const drawSpark = (spark, timestamp) => {
+      const elapsed = timestamp - spark.startTime;
+      if (elapsed >= duration) return false;
+      
+      const progress = elapsed / duration;
+      const eased = easeFunc(progress);
+      
+      const distance = eased * sparkRadius * extraScale;
+      const lineLength = sparkSize * (1 - eased);
+      
+      const x1 = spark.x + distance * Math.cos(spark.angle);
+      const y1 = spark.y + distance * Math.sin(spark.angle);
+      const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
+      const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
+      
+      ctx.strokeStyle = multiColor ? spark.color : sparkColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      
+      return true;
+    };
+
     const draw = (timestamp) => {
       if (!startTimeRef.current) {
-        startTimeRef.current = timestamp; // store initial time
+        startTimeRef.current = timestamp;
       }
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      sparksRef.current = sparksRef.current.filter((spark) => {
-        const elapsed = timestamp - spark.startTime;
-        if (elapsed >= duration) {
-          // Spark finished its animation
-          return false;
-        }
-
-        const progress = elapsed / duration;
-        const eased = easeFunc(progress);
-
-        const distance = eased * sparkRadius * extraScale;
-        const lineLength = sparkSize * (1 - eased);
-
-        // Points for the spark line
-        const x1 = spark.x + distance * Math.cos(spark.angle);
-        const y1 = spark.y + distance * Math.sin(spark.angle);
-        const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
-        const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
-
-        // Draw the spark line
-        ctx.strokeStyle = multiColor ? spark.color : sparkColor;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        return true;
-      });
-
+      
+      sparksRef.current = sparksRef.current.filter(spark => 
+        drawSpark(spark, timestamp)
+      );
+      
       animationId = requestAnimationFrame(draw);
     };
 
     animationId = requestAnimationFrame(draw);
 
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
-  }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale, multiColor]);
+    return () => cancelAnimationFrame(animationId);
+  }, [sparkColor, sparkSize, sparkRadius, duration, easeFunc, extraScale, multiColor]);
 
+  // Handle clicks and create sparks
   const handleClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
     const now = performance.now();
     
     const newSparks = Array.from({length: sparkCount}, (_, i) => {
@@ -140,7 +138,6 @@ const ClickSpark = ({
         startTime: now,
       };
       
-      // Add color property only if using multiColor
       if (multiColor) {
         spark.color = sparkColors[i % sparkColors.length];
       }
@@ -152,14 +149,8 @@ const ClickSpark = ({
   };
 
   return (
-    <div
-      className="relative w-full h-full"
-      onClick={handleClick}
-    >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-10"
-      />
+    <div className="relative w-full h-full" onClick={handleClick}>
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
       {children}
     </div>
   );

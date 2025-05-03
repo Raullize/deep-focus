@@ -139,6 +139,9 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center"
           onClick={(e) => e.target === e.currentTarget && onClose()}
+          role="dialog"
+          aria-labelledby="settings-title"
+          aria-modal="true"
         >
           <motion.div
             key="config-panel-content"
@@ -150,7 +153,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-primary">{t('settings')}</h2>
+              <h2 id="settings-title" className="text-xl font-bold text-primary">{t('settings')}</h2>
               <button
                 onClick={onClose}
                 className="p-2 rounded-full hover:bg-gray-800"
@@ -260,6 +263,9 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
             onClick={(e) => e.target === e.currentTarget && cancelReset()}
+            role="dialog"
+            aria-labelledby="reset-confirm-title"
+            aria-modal="true"
           >
             <motion.div
               key="reset-confirm-content"
@@ -270,7 +276,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
               className="w-[90%] max-w-sm bg-gray-900 rounded-xl p-5 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-medium text-center mb-4">{t('confirmReset')}</h3>
+              <h3 id="reset-confirm-title" className="text-lg font-medium text-center mb-4">{t('confirmReset')}</h3>
               <p className="text-sm text-gray-300 text-center mb-6">{t('confirmResetMessage')}</p>
               
               <div className="flex justify-center space-x-4">
@@ -297,15 +303,16 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
 
 const SettingItem = ({ label, value, onChange, min, max, unit }) => {
   // Gera um ID único para este campo específico
-  const id = `setting-${label.replace(/\s+/g, '-').toLowerCase()}`
+  const inputId = `input-${label.replace(/\s+/g, '-').toLowerCase()}`
+  const rangeId = `range-${label.replace(/\s+/g, '-').toLowerCase()}`
   
   return (
     <div className="flex flex-col py-2">
       <div className="flex justify-between items-center mb-2">
-        <label htmlFor={id} className="text-onBackground">{label}</label>
+        <label htmlFor={inputId} className="text-onBackground">{label}</label>
         <div className="flex items-center space-x-2">
           <input
-            id={id}
+            id={inputId}
             type="number"
             value={value}
             onChange={onChange}
@@ -317,9 +324,10 @@ const SettingItem = ({ label, value, onChange, min, max, unit }) => {
           <span className="text-sm text-gray-400">{unit}</span>
         </div>
       </div>
+      <label htmlFor={rangeId} className="sr-only">{`${label} - slider`}</label>
       <input
+        id={rangeId}
         type="range"
-        aria-labelledby={id}
         value={value}
         onChange={onChange}
         min={min}
@@ -335,48 +343,61 @@ const ToggleItem = ({ label, isEnabled, onToggle }) => {
   const id = `toggle-${label.replace(/\s+/g, '-').toLowerCase()}`
   
   return (
-    <div className="flex justify-between items-center py-2" onClick={onToggle}>
-      <label className="text-onBackground cursor-pointer">{label}</label>
-      <button 
-        id={id}
-        type="button"
-        role="switch"
-        aria-checked={isEnabled}
-        aria-label={label}
-        className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors ${
-          isEnabled ? 'bg-primary justify-end' : 'bg-gray-700 justify-start'
-        }`}
+    <div className="flex justify-between items-center py-2">
+      <span className="text-onBackground">{label}</span>
+      <label 
+        htmlFor={id} 
+        className="cursor-pointer"
+        onClick={(e) => e.preventDefault()}
       >
-        <motion.div 
-          layout
-          className="w-4 h-4 bg-white rounded-full"
+        <input
+          id={id}
+          type="checkbox"
+          className="sr-only"
+          checked={isEnabled}
+          onChange={onToggle}
+          aria-label={label}
         />
-      </button>
+        <button 
+          type="button"
+          onClick={onToggle}
+          role="switch"
+          aria-checked={isEnabled}
+          className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors ${
+            isEnabled ? 'bg-primary justify-end' : 'bg-gray-700 justify-start'
+          }`}
+        >
+          <motion.div 
+            layout
+            className="w-4 h-4 bg-white rounded-full"
+          />
+        </button>
+      </label>
     </div>
   )
 }
 
 const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
   // Gera um ID único para este campo específico
-  const id = `sound-selector-${label.replace(/\s+/g, '-').toLowerCase()}`
+  const groupName = `sound-selector-${label.replace(/\s+/g, '-').toLowerCase()}`
   
   return (
-    <div className="flex flex-col py-2">
-      <div className="text-onBackground mb-2">{label}</div>
+    <div className="flex flex-col py-2" role="radiogroup" aria-labelledby={`${groupName}-label`}>
+      <div id={`${groupName}-label`} className="text-onBackground mb-2">{label}</div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
         {options.map((option) => (
           <div key={option.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-2">
             <div className="flex items-center">
               <input
                 type="radio"
-                id={`${id}-${option.id}`}
-                name={id}
+                id={`${groupName}-${option.id}`}
+                name={groupName}
                 value={option.id}
                 checked={value === option.id}
                 onChange={() => onChange(option.id)}
                 className="mr-2"
               />
-              <label htmlFor={`${id}-${option.id}`} className="text-sm">
+              <label htmlFor={`${groupName}-${option.id}`} className="text-sm">
                 {option.name}
               </label>
             </div>

@@ -19,27 +19,22 @@ const TIMER_MODES = {
   LONG_BREAK: 'longBreak',
 }
 
-// Função para obter configurações salvas (fora do componente)
 const getSavedSettings = () => {
-  if (typeof window === 'undefined') {
-    return DEFAULT_SETTINGS;
-  }
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
   
   try {
     const savedSettings = localStorage.getItem('pomodoroSettings');
     if (!savedSettings) return DEFAULT_SETTINGS;
     
-    const parsedSettings = JSON.parse(savedSettings);
-    // Garantir que todas as propriedades existam
-    return { ...DEFAULT_SETTINGS, ...parsedSettings };
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
   } catch (e) {
-    console.error('Erro ao carregar configurações:', e);
+    console.error('Error loading settings:', e);
     return DEFAULT_SETTINGS;
   }
 };
 
 export default function useTimer() {
-  // Inicialização segura - utilizamos DEFAULT_SETTINGS para o SSR
+  // State
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [mode, setMode] = useState(TIMER_MODES.FOCUS);
   const [time, setTime] = useState(DEFAULT_SETTINGS.focusTime * 60);
@@ -47,58 +42,97 @@ export default function useTimer() {
   const [cycle, setCycle] = useState(1);
   const [totalTime, setTotalTime] = useState(DEFAULT_SETTINGS.focusTime * 60);
   
+  // Refs
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
   const initializedRef = useRef(false);
-  const lastUpdateTimeRef = useRef(0);
   const targetEndTimeRef = useRef(0);
-
-  // Carregar configurações do localStorage apenas uma vez, quando estiver no cliente
+  
+  // State refs for async operations
+  const modeRef = useRef(mode);
+  const cycleRef = useRef(cycle);
+  const settingsRef = useRef(settings);
+  const isActiveRef = useRef(isActive);
+  const timeRef = useRef(time);
+  const totalTimeRef = useRef(totalTime);
+  
+  // Keep refs updated
   useEffect(() => {
-    if (!initializedRef.current) {
-      const savedSettings = getSavedSettings();
-      setSettings(savedSettings);
-      
-      // Atualizar o tempo com base nas configurações carregadas
-      if (mode === TIMER_MODES.FOCUS) {
-        setTime(savedSettings.focusTime * 60);
-      } else if (mode === TIMER_MODES.SHORT_BREAK) {
-        setTime(savedSettings.shortBreakTime * 60);
-      } else if (mode === TIMER_MODES.LONG_BREAK) {
-        setTime(savedSettings.longBreakTime * 60);
-      }
-      
-      initializedRef.current = true;
+    modeRef.current = mode;
+    cycleRef.current = cycle;
+    settingsRef.current = settings;
+    isActiveRef.current = isActive;
+    timeRef.current = time;
+    totalTimeRef.current = totalTime;
+  }, [mode, cycle, settings, isActive, time, totalTime]);
+
+  // Initialization
+  useEffect(() => {
+    if (initializedRef.current) return;
+    
+    const savedSettings = getSavedSettings();
+    setSettings(savedSettings);
+    
+    let initialTime;
+    if (mode === TIMER_MODES.FOCUS) {
+      initialTime = savedSettings.focusTime * 60;
+    } else if (mode === TIMER_MODES.SHORT_BREAK) {
+      initialTime = savedSettings.shortBreakTime * 60;
+    } else {
+      initialTime = savedSettings.longBreakTime * 60;
     }
-  }, [mode]);
+    
+    setTime(initialTime);
+    setTotalTime(initialTime);
+    initializedRef.current = true;
+  }, []);
 
-  // Inicializar áudio para notificações
+  // Audio notification setup
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioRef.current = new Audio();
-      
-      // Usar o som selecionado nas configurações
-      const soundPath = `/notifications/${settings.notificationSound}.mp3`;
-      
-      fetch(soundPath)
-        .then(response => {
-          if (response.ok) {
-            audioRef.current.src = soundPath;
-          } else {
-            console.warn(`Arquivo de notificação ${soundPath} não encontrado`);
-            // Fallback para notificações do navegador se o som não for encontrado
-            if ('Notification' in window && settings.soundEnabled) {
-              Notification.requestPermission();
-            }
+    if (typeof window === 'undefined') return;
+    
+    const loadAudio = () => {
+      try {
+        if (!audioRef.current) {
+          audioRef.current = new Audio();
+        }
+        
+        const timestamp = new Date().getTime();
+        const soundPath = `/notifications/${settings.notificationSound}.mp3?t=${timestamp}`;
+        
+        audioRef.current.oncanplaythrough = () => {
+          console.log("Audio loaded successfully:", settings.notificationSound);
+        };
+        
+        audioRef.current.onerror = (e) => {
+          console.warn(`Could not load audio: ${settings.notificationSound}`, e.target.error);
+          if ('Notification' in window && settings.soundEnabled) {
+            Notification.requestPermission();
           }
-        })
-        .catch((error) => {
-          console.error('Erro ao carregar notificação:', error);
-        });
+        };
+        
+        audioRef.current.src = soundPath;
+        audioRef.current.load();
+      } catch (error) {
+        console.error("Error setting up audio:", error);
+      }
+    };
+    
+    if (settings.soundEnabled) {
+      loadAudio();
     }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.oncanplaythrough = null;
+        audioRef.current.onerror = null;
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
   }, [settings.soundEnabled, settings.notificationSound]);
 
-  // Atualizar timer com base em mudanças de modo
+  // Update timer when mode or settings change
   useEffect(() => {
     if (!initializedRef.current) return;
     
@@ -108,97 +142,71 @@ export default function useTimer() {
         newTime = settings.focusTime * 60;
       } else if (mode === TIMER_MODES.SHORT_BREAK) {
         newTime = settings.shortBreakTime * 60;
-      } else if (mode === TIMER_MODES.LONG_BREAK) {
+      } else {
         newTime = settings.longBreakTime * 60;
       }
       setTime(newTime);
       setTotalTime(newTime);
     } catch (error) {
-      console.error('Erro ao atualizar o tempo:', error);
-      setTime(25 * 60); // Valor padrão seguro
+      console.error('Error updating time:', error);
+      setTime(25 * 60);
       setTotalTime(25 * 60);
     }
-  }, [mode, settings]);
+  }, [mode, settings.focusTime, settings.shortBreakTime, settings.longBreakTime]);
 
-  // Salvar configurações no localStorage
+  // Save settings to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined' && initializedRef.current) {
-      try {
-        localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
-      } catch (error) {
-        console.error('Erro ao salvar configurações:', error);
-      }
+    if (typeof window === 'undefined' || !initializedRef.current) return;
+    
+    try {
+      localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Error saving settings:', error);
     }
   }, [settings]);
 
-  // Lógica de contagem regressiva do timer
+  // Timer countdown logic
   useEffect(() => {
     if (!isActive) return;
     
-    // Configurar o tempo alvo de término
-    if (time >= totalTime || targetEndTimeRef.current === 0) {
-      targetEndTimeRef.current = Date.now() + time * 1000;
-    } else {
-      // Retomando de uma pausa
-      targetEndTimeRef.current = Date.now() + time * 1000;
+    if (targetEndTimeRef.current === 0) {
+      targetEndTimeRef.current = Date.now() + timeRef.current * 1000;
     }
     
     const updateTimer = () => {
-      if (!isActive) return;
+      if (!isActiveRef.current) return;
       
       const now = Date.now();
       const remaining = Math.max(0, (targetEndTimeRef.current - now) / 1000);
       
-      // Atualizar o tempo com precisão decimal (para animação mais fluida)
-      setTime(remaining);
+      // Atualizando o valor de time através do setState
+      // Mas só quando há uma mudança significativa
+      if (Math.abs(remaining - timeRef.current) > 0.01) {
+        setTime(remaining);
+      }
       
-      // Se o timer chegou a zero ou próximo a zero
       if (remaining <= 0.01) {
         if (intervalRef.current) {
           cancelAnimationFrame(intervalRef.current);
           intervalRef.current = null;
         }
         
-        // Notificação sonora
-        if (settings.soundEnabled) {
-          if (audioRef.current && audioRef.current.src) {
-            audioRef.current.play().catch(() => {});
-          } else if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('DeepFocus', { 
-              body: mode === TIMER_MODES.FOCUS ? 'Hora de descansar!' : 'Hora de focar!',
-              icon: '/favicon.ico'
-            });
-          }
-        }
+        const currentMode = modeRef.current;
+        const currentCycle = cycleRef.current;
+        const currentSettings = settingsRef.current;
         
-        // Lógica de troca de modo
-        if (mode === TIMER_MODES.FOCUS) {
-          if (cycle >= settings.cyclesPerRound) {
-            setMode(TIMER_MODES.LONG_BREAK);
-            setCycle(1);
-          } else {
-            setMode(TIMER_MODES.SHORT_BREAK);
-            setCycle(prev => prev + 1);
-          }
-        } else {
-          setMode(TIMER_MODES.FOCUS);
-        }
+        // Play notification sound
+        playNotificationSound(currentMode, currentSettings);
         
-        // Auto-iniciar próximo ciclo, se configurado
-        if (settings.autoStartNextCycle) {
-          setTimeout(() => setIsActive(true), 100);
-        } else {
-          setIsActive(false);
-        }
+        // Handle timer completion and mode switching
+        handleTimerCompletion(currentMode, currentCycle, currentSettings);
         
         return;
       }
       
-      // Continuar a animação
       intervalRef.current = requestAnimationFrame(updateTimer);
     };
     
-    // Iniciar a animação
     if (intervalRef.current) {
       cancelAnimationFrame(intervalRef.current);
     }
@@ -210,16 +218,91 @@ export default function useTimer() {
         intervalRef.current = null;
       }
     };
-  }, [isActive, mode, cycle, settings]);
+  }, [isActive]); // Apenas isActive como dependência
 
-  // Funções do timer
+  // Play notification sound with fallbacks
+  const playNotificationSound = (currentMode, currentSettings) => {
+    if (!currentSettings.soundEnabled) return;
+    
+    try {
+      if (audioRef.current) {
+        if (audioRef.current.readyState >= 2) {
+          audioRef.current.currentTime = 0;
+          const playPromise = audioRef.current.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.warn("Could not play sound:", error);
+              showBrowserNotification(currentMode);
+            });
+          }
+        } else {
+          showBrowserNotification(currentMode);
+        }
+      } else {
+        showBrowserNotification(currentMode);
+      }
+    } catch (error) {
+      console.error("Error playing notification:", error);
+      showBrowserNotification(currentMode);
+    }
+  };
+
+  // Show browser notification as fallback
+  const showBrowserNotification = (currentMode) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('DeepFocus', { 
+        body: currentMode === TIMER_MODES.FOCUS ? 'Time to take a break!' : 'Time to focus!',
+        icon: '/favicon.ico'
+      });
+    }
+  };
+
+  // Handle timer completion and mode switching
+  const handleTimerCompletion = (currentMode, currentCycle, currentSettings) => {
+    let nextMode = currentMode;
+    let nextCycle = currentCycle;
+    
+    if (currentMode === TIMER_MODES.FOCUS) {
+      if (currentCycle >= currentSettings.cyclesPerRound) {
+        nextMode = TIMER_MODES.LONG_BREAK;
+        nextCycle = 1;
+      } else {
+        nextMode = TIMER_MODES.SHORT_BREAK;
+        nextCycle = currentCycle + 1;
+      }
+    } else {
+      nextMode = TIMER_MODES.FOCUS;
+    }
+    
+    // Use a single setTimeout to batch state updates (mais confiável que requestAnimationFrame neste caso)
+    setTimeout(() => {
+      if (nextMode !== currentMode) {
+        setMode(nextMode);
+      }
+      
+      if (nextCycle !== currentCycle) {
+        setCycle(nextCycle);
+      }
+      
+      if (currentSettings.autoStartNextCycle) {
+        setTimeout(() => setIsActive(true), 100);
+      } else {
+        setIsActive(false);
+      }
+      
+      // Resetar o targetEndTimeRef após alterações de modo para evitar problemas
+      targetEndTimeRef.current = 0;
+    }, 0);
+  };
+
+  // Timer control functions
   const startTimer = useCallback(() => {
-    // Se estiver reiniciando após uma pausa, ajustar o tempo alvo
     if (!isActive) {
-      targetEndTimeRef.current = Date.now() + time * 1000;
+      targetEndTimeRef.current = Date.now() + timeRef.current * 1000;
     }
     setIsActive(true);
-  }, [isActive, time]);
+  }, [isActive]);
   
   const pauseTimer = useCallback(() => {
     setIsActive(false);
@@ -233,43 +316,59 @@ export default function useTimer() {
       intervalRef.current = null;
     }
     
+    const currentMode = modeRef.current;
+    const currentSettings = settingsRef.current;
+    
     let newTime;
-    if (mode === TIMER_MODES.FOCUS) {
-      newTime = settings.focusTime * 60;
-    } else if (mode === TIMER_MODES.SHORT_BREAK) {
-      newTime = settings.shortBreakTime * 60;
-    } else if (mode === TIMER_MODES.LONG_BREAK) {
-      newTime = settings.longBreakTime * 60;
+    if (currentMode === TIMER_MODES.FOCUS) {
+      newTime = currentSettings.focusTime * 60;
+    } else if (currentMode === TIMER_MODES.SHORT_BREAK) {
+      newTime = currentSettings.shortBreakTime * 60;
+    } else {
+      newTime = currentSettings.longBreakTime * 60;
     }
     
-    // Resetar o tempo alvo
     targetEndTimeRef.current = 0;
     
     setTime(newTime);
     setTotalTime(newTime);
-  }, [mode, settings]);
+  }, []);
 
   const skipToNext = useCallback(() => {
     setIsActive(false);
     
-    if (mode === TIMER_MODES.FOCUS) {
-      if (cycle >= settings.cyclesPerRound) {
-        setMode(TIMER_MODES.LONG_BREAK);
-        setCycle(1);
-      } else {
-        setMode(TIMER_MODES.SHORT_BREAK);
-      }
-    } else if (mode === TIMER_MODES.SHORT_BREAK) {
-      setMode(TIMER_MODES.FOCUS);
-      setCycle(prev => prev + 1);
-    } else if (mode === TIMER_MODES.LONG_BREAK) {
-      setMode(TIMER_MODES.FOCUS);
-      setCycle(1);
+    if (intervalRef.current) {
+      cancelAnimationFrame(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [cycle, mode, settings.cyclesPerRound]);
+    
+    const currentMode = modeRef.current;
+    const currentCycle = cycleRef.current;
+    const currentSettings = settingsRef.current;
+    
+    targetEndTimeRef.current = 0;
+    
+    // Usar setTimeout para garantir que as atualizações de estado não entrem em conflito
+    setTimeout(() => {
+      if (currentMode === TIMER_MODES.FOCUS) {
+        if (currentCycle >= currentSettings.cyclesPerRound) {
+          setMode(TIMER_MODES.LONG_BREAK);
+          setCycle(1);
+        } else {
+          setMode(TIMER_MODES.SHORT_BREAK);
+        }
+      } else if (currentMode === TIMER_MODES.SHORT_BREAK) {
+        setMode(TIMER_MODES.FOCUS);
+        setCycle(prev => prev + 1);
+      } else {
+        setMode(TIMER_MODES.FOCUS);
+        setCycle(1);
+      }
+    }, 0);
+  }, []);
 
   const updateSettings = useCallback((newSettings) => {
-    // Validar e garantir valores seguros
+    // Validar as configurações primeiro
     const validatedSettings = { ...DEFAULT_SETTINGS };
     
     if (newSettings) {
@@ -287,17 +386,42 @@ export default function useTimer() {
       });
     }
     
-    setSettings(validatedSettings);
-    
-    // Atualizar tempo imediatamente
-    if (mode === TIMER_MODES.FOCUS) {
-      setTime(validatedSettings.focusTime * 60);
-    } else if (mode === TIMER_MODES.SHORT_BREAK) {
-      setTime(validatedSettings.shortBreakTime * 60);
-    } else if (mode === TIMER_MODES.LONG_BREAK) {
-      setTime(validatedSettings.longBreakTime * 60);
+    // Pausar o timer e cancelar o intervalo imediatamente
+    if (isActiveRef.current) {
+      if (intervalRef.current) {
+        cancelAnimationFrame(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
-  }, [mode]);
+    
+    // Resetar o tempo alvo
+    targetEndTimeRef.current = 0;
+    
+    // Usar setTimeout para garantir que as atualizações de estado não entrem em conflito
+    setTimeout(() => {
+      // Atualizar configurações
+      setSettings(validatedSettings);
+      
+      // Reiniciar o timer
+      setIsActive(false);
+      setCycle(1);
+      
+      // Atualizar o tempo com base no modo atual
+      const currentMode = modeRef.current;
+      
+      let newTime;
+      if (currentMode === TIMER_MODES.FOCUS) {
+        newTime = validatedSettings.focusTime * 60;
+      } else if (currentMode === TIMER_MODES.SHORT_BREAK) {
+        newTime = validatedSettings.shortBreakTime * 60;
+      } else {
+        newTime = validatedSettings.longBreakTime * 60;
+      }
+      
+      setTime(newTime);
+      setTotalTime(newTime);
+    }, 0);
+  }, []);
 
   return {
     time,
