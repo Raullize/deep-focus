@@ -30,5 +30,7 @@
   "confirmReset": "Restaurar Configurações Padrão?",
   "confirmResetMessage": "Isso irá restaurar todas as configurações para os valores padrão. Esta ação não pode ser desfeita.",
   "cancel": "Cancelar",
-  "confirmYes": "Sim, Restaurar"
+  "confirmYes": "Sim, Restaurar",
+  "focusMode": "Modo Foco",
+  "exitFocusMode": "Sair do Modo Foco"
 } 

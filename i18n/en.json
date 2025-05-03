@@ -30,5 +30,7 @@
   "confirmReset": "Reset to Default Settings?",
   "confirmResetMessage": "This will restore all settings to their default values. This action cannot be undone.",
   "cancel": "Cancel",
-  "confirmYes": "Yes, Reset"
+  "confirmYes": "Yes, Reset",
+  "focusMode": "Focus Mode",
+  "exitFocusMode": "Exit Focus Mode"
 } 

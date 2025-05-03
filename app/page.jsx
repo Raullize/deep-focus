@@ -18,6 +18,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isFocusMode, setIsFocusMode] = useState(false)
   const { t } = useTranslation()
   const timer = useTimer()
   
@@ -59,14 +60,19 @@ export default function Home() {
           skipToNext()
           break
         case 'KeyS':
-          setIsSettingsOpen(prev => !prev)
+          if (!isFocusMode) setIsSettingsOpen(prev => !prev)
           break
         case 'KeyF':
           toggleFullscreen()
           break
+        case 'KeyM':
+          toggleFocusMode()
+          break
         case 'Escape':
           if (isSettingsOpen) {
             setIsSettingsOpen(false)
+          } else if (isFocusMode) {
+            setIsFocusMode(false)
           }
           break
       }
@@ -74,7 +80,7 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted, isSettingsOpen])
+  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted, isSettingsOpen, isFocusMode])
 
   // Função para alternar modo tela cheia
   const toggleFullscreen = () => {
@@ -88,6 +94,14 @@ export default function Home() {
         document.exitFullscreen()
         setIsFullscreen(false)
       }
+    }
+  }
+
+  // Função para alternar Focus Mode
+  const toggleFocusMode = () => {
+    setIsFocusMode(prev => !prev)
+    if (isSettingsOpen) {
+      setIsSettingsOpen(false)
     }
   }
 
@@ -105,7 +119,7 @@ export default function Home() {
       multiColor={true}
     >
       <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
-        {/* Particles Background */}
+        {/* Particles Background - mantidas no Focus Mode */}
         {mounted && (
           <Particles 
             particleCount={100}
@@ -119,27 +133,49 @@ export default function Home() {
           />
         )}
         
-        <div className="absolute top-4 right-4 z-10">
-          <LanguageToggle />
-        </div>
+        {/* Language Toggle - escondido no Focus Mode */}
+        {!isFocusMode && (
+          <div className="absolute top-4 right-4 z-10">
+            <LanguageToggle />
+          </div>
+        )}
         
         <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center flex-grow gap-8">
-          <GradientText 
-            className="text-3xl font-bold" 
-            colors={["#3B82F6", "#8B5CF6", "#EC4899", "#8B5CF6", "#3B82F6"]}
-            animationSpeed={5}
-          >
-            DeepFocus
-          </GradientText>
-          
-          <div className="text-center">
-            <div className="mb-2 text-xl">
-              {mode === 'focus' && t('focus')}
-              {mode === 'shortBreak' && t('shortBreak')}
-              {mode === 'longBreak' && t('longBreak')}
+          {/* Título - escondido ou adaptado no Focus Mode */}
+          {isFocusMode ? (
+            <div className="flex items-center text-xl opacity-50">
+              <span>{t('focusMode')}</span>
+              <button 
+                onClick={toggleFocusMode}
+                className="ml-4 p-2 rounded-full hover:bg-gray-800/50 transition-colors"
+                aria-label={t('exitFocusMode')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+              </button>
             </div>
+          ) : (
+            <GradientText 
+              className="text-3xl font-bold" 
+              colors={["#3B82F6", "#8B5CF6", "#EC4899", "#8B5CF6", "#3B82F6"]}
+              animationSpeed={5}
+            >
+              DeepFocus
+            </GradientText>
+          )}
+          
+          {/* Informações do Timer - adaptados no Focus Mode */}
+          <div className="text-center">
+            {!isFocusMode && (
+              <div className="mb-2 text-xl">
+                {mode === 'focus' && t('focus')}
+                {mode === 'shortBreak' && t('shortBreak')}
+                {mode === 'longBreak' && t('longBreak')}
+              </div>
+            )}
             
-            {mode === 'focus' && (
+            {!isFocusMode && mode === 'focus' && (
               <div className="text-sm mb-2">
                 {t('cycle')} {cycle}/{totalCycles}
               </div>
@@ -152,25 +188,45 @@ export default function Home() {
             />
           </div>
 
-          <Controls 
-            isActive={isActive}
-            onStart={startTimer}
-            onPause={pauseTimer}
-            onReset={resetTimer} 
-            onSkip={skipToNext}
-            onSettings={() => setIsSettingsOpen(true)}
-          />
+          {/* Controles - escondidos ou adaptados no Focus Mode */}
+          {isFocusMode ? (
+            <div>
+              <button
+                onClick={isActive ? pauseTimer : startTimer}
+                className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                  isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-primary hover:bg-primary/80 text-black'
+                }`}
+              >
+                {isActive ? t('pause') : t('start')}
+              </button>
+            </div>
+          ) : (
+            <>
+              <Controls 
+                isActive={isActive}
+                onStart={startTimer}
+                onPause={pauseTimer}
+                onReset={resetTimer} 
+                onSkip={skipToNext}
+                onSettings={() => setIsSettingsOpen(true)}
+                onFocusMode={toggleFocusMode}
+              />
+            </>
+          )}
         </div>
 
-        <ConfigPanel 
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          settings={settings}
-          onUpdateSettings={updateSettings}
-        />
+        {/* Configurações - escondido no Focus Mode */}
+        {!isFocusMode && (
+          <ConfigPanel 
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            settings={settings}
+            onUpdateSettings={updateSettings}
+          />
+        )}
         
-        {/* Atalhos de teclado para desktop - apenas se habilitado nas configurações */}
-        {settings.showKeyboardShortcuts && (
+        {/* Atalhos de teclado para desktop - escondido no Focus Mode */}
+        {!isFocusMode && settings.showKeyboardShortcuts && (
           <div className="w-full text-center text-xs mt-4 mb-0 opacity-70 hidden md:block">
             <p className="mb-1">{t('shortcuts')}</p>
             <p>
@@ -179,20 +235,11 @@ export default function Home() {
               <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
               <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
               <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">M</span> {t('focusMode')} |
               <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
             </p>
           </div>
         )}
-        
-        {/* Atalhos de teclado para mobile (mais compactos) */}
-        <div className="w-full text-center text-xs mt-2 mb-0 opacity-70 md:hidden">
-          <button 
-            onClick={() => alert(t('spaceKey') + ': ' + t('startPause') + ', R: ' + t('reset') + ', N: ' + t('next') + ', S: ' + t('settings') + ', F: ' + t('fullscreen') + ', ESC: ' + t('closeModal'))}
-            className="text-xs underline"
-          >
-            {t('shortcuts')}
-          </button>
-        </div>
       </main>
     </ClickSpark>
   )
