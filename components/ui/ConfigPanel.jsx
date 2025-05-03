@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useTranslation from '../../i18n/useTranslation'
 
@@ -12,10 +12,20 @@ const DEFAULT_SETTINGS = {
   cyclesPerRound: 4,
   soundEnabled: true,
   autoStartNextCycle: false,
+  notificationSound: 'notification1',
 }
+
+// Lista de sons disponíveis
+const NOTIFICATION_SOUNDS = [
+  { id: 'notification1', name: 'Notification 1' },
+  { id: 'notification10', name: 'Notification 2' },
+  { id: 'notification11', name: 'Notification 3' },
+  { id: 'notification12', name: 'Notification 4' },
+]
 
 const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
   const { t } = useTranslation()
+  const audioRef = useRef(null)
   
   // Garantir que temos um objeto settings válido e com valores padrão para propriedades ausentes
   const safeSettings = { ...DEFAULT_SETTINGS, ...(settings || {}) }
@@ -30,6 +40,19 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
     }
   }, [settings])
 
+  // Inicializar o elemento de áudio para teste de som
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio()
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+    }
+  }, [])
+
   const handleInputChange = (field, value) => {
     setLocalSettings(prev => ({
       ...prev,
@@ -42,6 +65,27 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
       ...prev,
       [field]: !prev[field]
     }))
+  }
+  
+  const handleSelectChange = (field, value) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+  
+  const handleTestSound = (soundId) => {
+    if (audioRef.current) {
+      // Parar qualquer reprodução atual
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      
+      // Carregar e reproduzir o som selecionado
+      audioRef.current.src = `/notifications/${soundId}.mp3`
+      audioRef.current.play().catch(error => {
+        console.error('Erro ao reproduzir som:', error)
+      })
+    }
   }
   
   const handleResetToDefaults = () => {
@@ -132,6 +176,16 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
                 onToggle={() => handleToggle('soundEnabled')}
               />
               
+              {localSettings.soundEnabled && (
+                <SoundSelectorItem
+                  label={t('notificationSound')}
+                  value={localSettings.notificationSound}
+                  onChange={(value) => handleSelectChange('notificationSound', value)}
+                  onTest={handleTestSound}
+                  options={NOTIFICATION_SOUNDS}
+                />
+              )}
+              
               <ToggleItem 
                 label={t('autoStartNextCycle')}
                 isEnabled={localSettings.autoStartNextCycle}
@@ -218,6 +272,47 @@ const ToggleItem = ({ label, isEnabled, onToggle }) => {
           className="w-4 h-4 bg-white rounded-full"
         />
       </button>
+    </div>
+  )
+}
+
+const SoundSelectorItem = ({ label, value, onChange, onTest, options }) => {
+  // Gera um ID único para este campo específico
+  const id = `sound-selector-${label.replace(/\s+/g, '-').toLowerCase()}`
+  
+  return (
+    <div className="flex flex-col py-2">
+      <label htmlFor={id} className="text-onBackground mb-2">{label}</label>
+      <div className="flex flex-col space-y-2">
+        {options.map((option) => (
+          <div key={option.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id={`${id}-${option.id}`}
+                name={id}
+                value={option.id}
+                checked={value === option.id}
+                onChange={() => onChange(option.id)}
+                className="mr-3"
+              />
+              <label htmlFor={`${id}-${option.id}`} className="text-sm">
+                {option.name}
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => onTest(option.id)}
+              className="p-2 text-xs bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              aria-label={`Testar som ${option.name}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS = {
   cyclesPerRound: 4,
   soundEnabled: true,
   autoStartNextCycle: false,
+  notificationSound: 'notification1'
 }
 
 const TIMER_MODES = {
@@ -75,20 +76,26 @@ export default function useTimer() {
     if (typeof window !== 'undefined') {
       audioRef.current = new Audio();
       
-      fetch('/notification.mp3')
+      // Usar o som selecionado nas configurações
+      const soundPath = `/notifications/${settings.notificationSound}.mp3`;
+      
+      fetch(soundPath)
         .then(response => {
           if (response.ok) {
-            audioRef.current.src = '/notification.mp3';
+            audioRef.current.src = soundPath;
           } else {
-            console.warn('Arquivo de notificação não encontrado');
+            console.warn(`Arquivo de notificação ${soundPath} não encontrado`);
+            // Fallback para notificações do navegador se o som não for encontrado
             if ('Notification' in window && settings.soundEnabled) {
               Notification.requestPermission();
             }
           }
         })
-        .catch(() => {});
+        .catch((error) => {
+          console.error('Erro ao carregar notificação:', error);
+        });
     }
-  }, [settings.soundEnabled]);
+  }, [settings.soundEnabled, settings.notificationSound]);
 
   // Atualizar timer com base em mudanças de modo
   useEffect(() => {
