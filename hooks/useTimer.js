@@ -42,29 +42,29 @@ export default function useTimer() {
   const [cycle, setCycle] = useState(1);
   const [totalTime, setTotalTime] = useState(DEFAULT_SETTINGS.focusTime * 60);
   
-  // Refs
+  // Pure Refs (not connected to state)
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
   const initializedRef = useRef(false);
   const targetEndTimeRef = useRef(0);
+  const timerStateRef = useRef({
+    time: DEFAULT_SETTINGS.focusTime * 60,
+    isActive: false,
+    mode: TIMER_MODES.FOCUS,
+    cycle: 1,
+    settings: DEFAULT_SETTINGS,
+    totalTime: DEFAULT_SETTINGS.focusTime * 60
+  });
   
-  // State refs for async operations
-  const modeRef = useRef(mode);
-  const cycleRef = useRef(cycle);
-  const settingsRef = useRef(settings);
-  const isActiveRef = useRef(isActive);
-  const timeRef = useRef(time);
-  const totalTimeRef = useRef(totalTime);
+  // Função para sincronizar o estado do React com os refs
+  const syncStateFromRef = useCallback(() => {
+    setTime(timerStateRef.current.time);
+  }, []);
   
-  // Keep refs updated
-  useEffect(() => {
-    modeRef.current = mode;
-    cycleRef.current = cycle;
-    settingsRef.current = settings;
-    isActiveRef.current = isActive;
-    timeRef.current = time;
-    totalTimeRef.current = totalTime;
-  }, [mode, cycle, settings, isActive, time, totalTime]);
+  // Função para atualizar o timerStateRef sem causar renderizações
+  const updateTimerState = useCallback((updates) => {
+    timerStateRef.current = { ...timerStateRef.current, ...updates };
+  }, []);
 
   // Initialization
   useEffect(() => {
@@ -84,8 +84,26 @@ export default function useTimer() {
     
     setTime(initialTime);
     setTotalTime(initialTime);
+    updateTimerState({
+      time: initialTime,
+      totalTime: initialTime,
+      settings: savedSettings
+    });
+    
     initializedRef.current = true;
-  }, []);
+  }, [mode, updateTimerState]);
+
+  // Manter timerStateRef atualizado com os estados do React
+  useEffect(() => {
+    updateTimerState({
+      time,
+      isActive,
+      mode,
+      cycle,
+      settings,
+      totalTime
+    });
+  }, [time, isActive, mode, cycle, settings, totalTime, updateTimerState]);
 
   // Audio notification setup
   useEffect(() => {
@@ -147,12 +165,20 @@ export default function useTimer() {
       }
       setTime(newTime);
       setTotalTime(newTime);
+      updateTimerState({
+        time: newTime,
+        totalTime: newTime
+      });
     } catch (error) {
       console.error('Error updating time:', error);
       setTime(25 * 60);
       setTotalTime(25 * 60);
+      updateTimerState({
+        time: 25 * 60,
+        totalTime: 25 * 60
+      });
     }
-  }, [mode, settings.focusTime, settings.shortBreakTime, settings.longBreakTime]);
+  }, [mode, settings.focusTime, settings.shortBreakTime, settings.longBreakTime, updateTimerState]);
 
   // Save settings to localStorage
   useEffect(() => {
@@ -165,41 +191,58 @@ export default function useTimer() {
     }
   }, [settings]);
 
-  // Timer countdown logic
+  // Timer countdown logic - completamente reconstruído para evitar loops
   useEffect(() => {
-    if (!isActive) return;
-    
-    if (targetEndTimeRef.current === 0) {
-      targetEndTimeRef.current = Date.now() + timeRef.current * 1000;
+    // Cancelar qualquer timer anterior
+    if (intervalRef.current) {
+      cancelAnimationFrame(intervalRef.current);
+      intervalRef.current = null;
     }
     
+    // Se não estiver ativo, não iniciar o timer
+    if (!isActive) return;
+    
+    // Contador apenas para saber quando sincronizar com o state do React
+    let frameCount = 0;
+    
+    // Inicializar o temporizador
+    if (targetEndTimeRef.current === 0) {
+      targetEndTimeRef.current = Date.now() + timerStateRef.current.time * 1000;
+    }
+    
+    // Função de atualização do temporizador - manipula apenas refs, não state
     const updateTimer = () => {
-      if (!isActiveRef.current) return;
+      // Verificar se ainda está ativo
+      if (!timerStateRef.current.isActive) return;
       
       const now = Date.now();
       const remaining = Math.max(0, (targetEndTimeRef.current - now) / 1000);
       
-      // Atualizando o valor de time através do setState
-      // Mas só quando há uma mudança significativa
-      if (Math.abs(remaining - timeRef.current) > 0.01) {
-        setTime(remaining);
+      // Atualizar apenas o ref do time, não o state
+      updateTimerState({ time: remaining });
+      
+      // A cada 10 frames, sincronizar com o state do React (aproximadamente 6 vezes por segundo em 60fps)
+      frameCount++;
+      if (frameCount >= 10) {
+        syncStateFromRef();
+        frameCount = 0;
       }
       
+      // Verificar se o timer terminou
       if (remaining <= 0.01) {
         if (intervalRef.current) {
           cancelAnimationFrame(intervalRef.current);
           intervalRef.current = null;
         }
         
-        const currentMode = modeRef.current;
-        const currentCycle = cycleRef.current;
-        const currentSettings = settingsRef.current;
+        // Sincronizar uma última vez
+        syncStateFromRef();
         
         // Play notification sound
-        playNotificationSound(currentMode, currentSettings);
+        playNotificationSound();
         
-        // Handle timer completion and mode switching
-        handleTimerCompletion(currentMode, currentCycle, currentSettings);
+        // Handle timer completion
+        handleTimerCompletion();
         
         return;
       }
@@ -207,21 +250,23 @@ export default function useTimer() {
       intervalRef.current = requestAnimationFrame(updateTimer);
     };
     
-    if (intervalRef.current) {
-      cancelAnimationFrame(intervalRef.current);
-    }
+    // Iniciar o timer
     intervalRef.current = requestAnimationFrame(updateTimer);
     
+    // Cleanup
     return () => {
       if (intervalRef.current) {
         cancelAnimationFrame(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [isActive]); // Apenas isActive como dependência
+  }, [isActive, syncStateFromRef, updateTimerState]);
 
   // Play notification sound with fallbacks
-  const playNotificationSound = (currentMode, currentSettings) => {
+  const playNotificationSound = useCallback(() => {
+    const currentSettings = timerStateRef.current.settings;
+    const currentMode = timerStateRef.current.mode;
+    
     if (!currentSettings.soundEnabled) return;
     
     try {
@@ -246,20 +291,25 @@ export default function useTimer() {
       console.error("Error playing notification:", error);
       showBrowserNotification(currentMode);
     }
-  };
+  }, []);
 
   // Show browser notification as fallback
-  const showBrowserNotification = (currentMode) => {
+  const showBrowserNotification = useCallback((currentMode) => {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('DeepFocus', { 
         body: currentMode === TIMER_MODES.FOCUS ? 'Time to take a break!' : 'Time to focus!',
         icon: '/favicon.ico'
       });
     }
-  };
+  }, []);
 
   // Handle timer completion and mode switching
-  const handleTimerCompletion = (currentMode, currentCycle, currentSettings) => {
+  const handleTimerCompletion = useCallback(() => {
+    const currentState = timerStateRef.current;
+    const currentMode = currentState.mode;
+    const currentCycle = currentState.cycle;
+    const currentSettings = currentState.settings;
+    
     let nextMode = currentMode;
     let nextCycle = currentCycle;
     
@@ -275,31 +325,43 @@ export default function useTimer() {
       nextMode = TIMER_MODES.FOCUS;
     }
     
-    // Use a single setTimeout to batch state updates (mais confiável que requestAnimationFrame neste caso)
-    setTimeout(() => {
-      if (nextMode !== currentMode) {
-        setMode(nextMode);
-      }
-      
-      if (nextCycle !== currentCycle) {
-        setCycle(nextCycle);
-      }
-      
-      if (currentSettings.autoStartNextCycle) {
-        setTimeout(() => setIsActive(true), 100);
-      } else {
-        setIsActive(false);
-      }
-      
-      // Resetar o targetEndTimeRef após alterações de modo para evitar problemas
-      targetEndTimeRef.current = 0;
-    }, 0);
-  };
+    // Resetar o timer
+    targetEndTimeRef.current = 0;
+    
+    // Atualizar estado apenas quando houver mudanças
+    let updates = {};
+    
+    if (nextMode !== currentMode) {
+      updates.mode = nextMode;
+      setMode(nextMode);
+    }
+    
+    if (nextCycle !== currentCycle) {
+      updates.cycle = nextCycle;
+      setCycle(nextCycle);
+    }
+    
+    if (!currentSettings.autoStartNextCycle) {
+      updates.isActive = false;
+      setIsActive(false);
+    } else {
+      // Pequeno atraso para garantir que os outros estados sejam atualizados primeiro
+      setTimeout(() => {
+        setIsActive(true);
+        updateTimerState({ isActive: true });
+      }, 100);
+    }
+    
+    // Atualizar o ref com todas as mudanças
+    if (Object.keys(updates).length > 0) {
+      updateTimerState(updates);
+    }
+  }, [updateTimerState]);
 
   // Timer control functions
   const startTimer = useCallback(() => {
     if (!isActive) {
-      targetEndTimeRef.current = Date.now() + timeRef.current * 1000;
+      targetEndTimeRef.current = Date.now() + timerStateRef.current.time * 1000;
     }
     setIsActive(true);
   }, [isActive]);
@@ -316,8 +378,9 @@ export default function useTimer() {
       intervalRef.current = null;
     }
     
-    const currentMode = modeRef.current;
-    const currentSettings = settingsRef.current;
+    const currentState = timerStateRef.current;
+    const currentMode = currentState.mode;
+    const currentSettings = currentState.settings;
     
     let newTime;
     if (currentMode === TIMER_MODES.FOCUS) {
@@ -332,7 +395,11 @@ export default function useTimer() {
     
     setTime(newTime);
     setTotalTime(newTime);
-  }, []);
+    updateTimerState({
+      time: newTime,
+      totalTime: newTime
+    });
+  }, [updateTimerState]);
 
   const skipToNext = useCallback(() => {
     setIsActive(false);
@@ -342,30 +409,47 @@ export default function useTimer() {
       intervalRef.current = null;
     }
     
-    const currentMode = modeRef.current;
-    const currentCycle = cycleRef.current;
-    const currentSettings = settingsRef.current;
+    const currentState = timerStateRef.current;
+    const currentMode = currentState.mode;
+    const currentCycle = currentState.cycle;
+    const currentSettings = currentState.settings;
     
     targetEndTimeRef.current = 0;
     
-    // Usar setTimeout para garantir que as atualizações de estado não entrem em conflito
+    // Usar o setTimeout para evitar problemas de batching
     setTimeout(() => {
       if (currentMode === TIMER_MODES.FOCUS) {
         if (currentCycle >= currentSettings.cyclesPerRound) {
           setMode(TIMER_MODES.LONG_BREAK);
           setCycle(1);
+          updateTimerState({
+            mode: TIMER_MODES.LONG_BREAK,
+            cycle: 1
+          });
         } else {
           setMode(TIMER_MODES.SHORT_BREAK);
+          updateTimerState({
+            mode: TIMER_MODES.SHORT_BREAK
+          });
         }
       } else if (currentMode === TIMER_MODES.SHORT_BREAK) {
         setMode(TIMER_MODES.FOCUS);
-        setCycle(prev => prev + 1);
+        const newCycle = currentCycle + 1;
+        setCycle(newCycle);
+        updateTimerState({
+          mode: TIMER_MODES.FOCUS,
+          cycle: newCycle
+        });
       } else {
         setMode(TIMER_MODES.FOCUS);
         setCycle(1);
+        updateTimerState({
+          mode: TIMER_MODES.FOCUS,
+          cycle: 1
+        });
       }
     }, 0);
-  }, []);
+  }, [updateTimerState]);
 
   const updateSettings = useCallback((newSettings) => {
     // Validar as configurações primeiro
@@ -387,17 +471,15 @@ export default function useTimer() {
     }
     
     // Pausar o timer e cancelar o intervalo imediatamente
-    if (isActiveRef.current) {
-      if (intervalRef.current) {
-        cancelAnimationFrame(intervalRef.current);
-        intervalRef.current = null;
-      }
+    if (intervalRef.current) {
+      cancelAnimationFrame(intervalRef.current);
+      intervalRef.current = null;
     }
     
     // Resetar o tempo alvo
     targetEndTimeRef.current = 0;
     
-    // Usar setTimeout para garantir que as atualizações de estado não entrem em conflito
+    // Atualizações de estado em um setTimeout para evitar loops
     setTimeout(() => {
       // Atualizar configurações
       setSettings(validatedSettings);
@@ -407,7 +489,7 @@ export default function useTimer() {
       setCycle(1);
       
       // Atualizar o tempo com base no modo atual
-      const currentMode = modeRef.current;
+      const currentMode = timerStateRef.current.mode;
       
       let newTime;
       if (currentMode === TIMER_MODES.FOCUS) {
@@ -420,8 +502,17 @@ export default function useTimer() {
       
       setTime(newTime);
       setTotalTime(newTime);
+      
+      // Atualizar o ref
+      updateTimerState({
+        settings: validatedSettings,
+        isActive: false,
+        cycle: 1,
+        time: newTime,
+        totalTime: newTime
+      });
     }, 0);
-  }, []);
+  }, [updateTimerState]);
 
   return {
     time,
