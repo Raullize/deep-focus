@@ -36,6 +36,9 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
   const { t } = useTranslation()
   const audioRef = useRef(null)
   
+  // Estado para controlar o modal de confirmação de reset
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
+  
   // Garantir que temos um objeto settings válido e com valores padrão para propriedades ausentes
   const safeSettings = { ...DEFAULT_SETTINGS, ...(settings || {}) }
   
@@ -98,7 +101,22 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
   }
   
   const handleResetToDefaults = () => {
+    // Ao invés de resetar diretamente, abrir o modal de confirmação
+    setIsResetModalOpen(true)
+  }
+  
+  const confirmReset = () => {
+    // Resetar para valores padrão
     setLocalSettings(DEFAULT_SETTINGS)
+    // Fechar o modal de confirmação
+    setIsResetModalOpen(false)
+    // Salvar automaticamente
+    onUpdateSettings(DEFAULT_SETTINGS)
+  }
+  
+  const cancelReset = () => {
+    // Apenas fechar o modal de confirmação
+    setIsResetModalOpen(false)
   }
 
   const handleSave = () => {
@@ -229,6 +247,46 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
           </motion.div>
         </motion.div>
       )}
+      
+      {/* Modal de Confirmação para Reset */}
+      <AnimatePresence>
+        {isResetModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+            onClick={(e) => e.target === e.currentTarget && cancelReset()}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="w-[90%] max-w-sm bg-gray-900 rounded-xl p-5 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-medium text-center mb-4">{t('confirmReset')}</h3>
+              <p className="text-sm text-gray-300 text-center mb-6">{t('confirmResetMessage')}</p>
+              
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={cancelReset}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  onClick={confirmReset}
+                  className="px-4 py-2 bg-error text-white rounded-lg font-medium hover:bg-error/80 transition-colors"
+                >
+                  {t('confirmYes')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>
   )
 }

@@ -26,5 +26,9 @@
   "resetToDefaults": "Restaurar Padrões",
   "autoStartNextCycle": "Iniciar Próximo Ciclo Automaticamente",
   "fullscreen": "Tela Cheia",
-  "closeModal": "Fechar Configurações"
+  "closeModal": "Fechar Configurações",
+  "confirmReset": "Restaurar Configurações Padrão?",
+  "confirmResetMessage": "Isso irá restaurar todas as configurações para os valores padrão. Esta ação não pode ser desfeita.",
+  "cancel": "Cancelar",
+  "confirmYes": "Sim, Restaurar"
 } 
