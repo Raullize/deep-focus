@@ -119,7 +119,7 @@ export default function useTimer() {
         const soundPath = `/notifications/${settings.notificationSound}.mp3?t=${timestamp}`;
         
         audioRef.current.oncanplaythrough = () => {
-          console.log("Audio loaded successfully:", settings.notificationSound);
+          // Removendo o console.log desnecessário
         };
         
         audioRef.current.onerror = (e) => {

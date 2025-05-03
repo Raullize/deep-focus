@@ -8,12 +8,8 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Debug log
-    console.log('OnboardingStepper mount, forceShow:', forceShow);
-    
     // Se forceShow for true, mostrar o onboarding independentemente
     if (forceShow) {
-      console.log('forceShow é true, abrindo o tutorial');
       setIsOpen(true);
       return;
     }
@@ -22,11 +18,8 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
       // Verificar no localStorage se o onboarding já foi mostrado
       const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
       
-      console.log('hasSeenOnboarding:', hasSeenOnboarding);
-      
       if (hasSeenOnboarding !== 'true') {
         // Se for a primeira visita, mostrar o onboarding
-        console.log('Primeira visita, abrindo o tutorial');
         setIsOpen(true);
       }
     } catch (error) {
@@ -37,7 +30,6 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
   }, [forceShow]);
 
   const handleComplete = () => {
-    console.log('Tutorial concluído');
     // Marcar que o usuário já viu o onboarding
     try {
       localStorage.setItem('hasSeenOnboarding', 'true');
@@ -49,11 +41,9 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
   };
 
   if (!isOpen) {
-    console.log('OnboardingStepper não está aberto, retornando null');
     return null;
   }
 
-  console.log('Renderizando o Stepper');
   return (
     <motion.div 
       initial={{ opacity: 0 }}
