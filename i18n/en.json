@@ -32,5 +32,7 @@
   "cancel": "Cancel",
   "confirmYes": "Yes, Reset",
   "focusMode": "Focus Mode",
-  "exitFocusMode": "Exit Focus Mode"
+  "exitFocusMode": "Exit Focus Mode",
+  "help": "Help",
+  "helpTip": "View tutorial"
 } 

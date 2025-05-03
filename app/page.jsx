@@ -13,6 +13,7 @@ import useTimer from '../hooks/useTimer'
 const TimerDisplay = dynamic(() => import('../components/ui/TimerDisplay'), { ssr: false })
 const ConfigPanel = dynamic(() => import('../components/ui/ConfigPanel'), { ssr: false })
 const Particles = dynamic(() => import('../components/ui/Particles'), { ssr: false })
+const OnboardingStepper = dynamic(() => import('../components/OnboardingStepper'), { ssr: false })
 
 const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"] // Blue, Purple, Pink
 
@@ -21,6 +22,7 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const { t } = useTranslation()
   
   const {
@@ -66,11 +68,17 @@ export default function Home() {
         case 'KeyM':
           toggleFocusMode()
           break
+        case 'KeyH':
+          console.log('Tecla H pressionada, definindo showOnboarding como true');
+          setShowOnboarding(true);
+          break
         case 'Escape':
           if (isSettingsOpen) {
             setIsSettingsOpen(false)
           } else if (isFocusMode) {
             setIsFocusMode(false)
+          } else if (showOnboarding) {
+            setShowOnboarding(false)
           }
           break
       }
@@ -78,7 +86,18 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isActive, pauseTimer, resetTimer, skipToNext, startTimer, mounted, isSettingsOpen, isFocusMode])
+  }, [
+    isActive, 
+    pauseTimer, 
+    resetTimer, 
+    skipToNext, 
+    startTimer, 
+    mounted, 
+    isSettingsOpen, 
+    isFocusMode, 
+    showOnboarding, 
+    setShowOnboarding
+  ])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -99,7 +118,7 @@ export default function Home() {
     }
   }
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   return (
     <ClickSpark
@@ -112,6 +131,14 @@ export default function Home() {
       multiColor={true}
     >
       <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
+        {/* Componente Onboarding - mostrado na primeira visita ou quando showOnboarding é true */}
+        {mounted && (
+          <OnboardingStepper 
+            forceShow={showOnboarding} 
+            onComplete={() => setShowOnboarding(false)}
+          />
+        )}
+        
         {mounted && (
           <Particles 
             particleCount={100}
@@ -126,7 +153,19 @@ export default function Home() {
         )}
         
         {!isFocusMode && (
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
+            <button
+              onClick={() => {
+                console.log('Botão de ajuda clicado, definindo showOnboarding como true');
+                setShowOnboarding(true);
+              }}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+              title={t('helpTip') || "Ver tutorial"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+            </button>
             <LanguageToggle />
           </div>
         )}
@@ -243,6 +282,7 @@ export default function Home() {
             <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
             <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
             <span className="bg-gray-800 px-2 py-1 rounded mx-1">M</span> {t('focusMode')} |
+            <span className="bg-gray-800 px-2 py-1 rounded mx-1">H</span> {t('help') || "Ajuda"} |
             <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
           </p>
         </div>
