@@ -248,44 +248,40 @@ function StepIndicator({
   return (
     <motion.div
       onClick={handleClick}
-      className="relative cursor-pointer outline-none focus:outline-none"
-      animate={status}
-      initial={false}
+      className={`flex items-center justify-center rounded-full p-1 transition-colors duration-200 ${
+        disableStepIndicators
+          ? "cursor-default"
+          : status === "active"
+          ? "cursor-default"
+          : status === "complete"
+          ? "cursor-pointer"
+          : status === "inactive"
+          ? "cursor-not-allowed"
+          : ""
+      }`}
+      whileTap={!disableStepIndicators ? { scale: 0.95 } : {}}
     >
-      <motion.div
-        variants={{
-          inactive: { scale: 1, backgroundColor: "#333", color: "#a3a3a3" },
-          active: { scale: 1, backgroundColor: "#3B82F6", color: "#3B82F6" },
-          complete: { scale: 1, backgroundColor: "#3B82F6", color: "#3B82F6" },
-        }}
-        transition={{ duration: 0.3 }}
-        className="flex h-8 w-8 items-center justify-center rounded-full font-semibold"
+      <div
+        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+          status === "active"
+            ? "bg-primary text-black"
+            : status === "complete"
+            ? "bg-green-500 text-black"
+            : "bg-gray-700 text-gray-400"
+        }`}
       >
-        {status === "complete" ? (
-          <CheckIcon className="h-4 w-4 text-white" />
-        ) : status === "active" ? (
-          <div className="h-3 w-3 rounded-full bg-white" />
-        ) : (
-          <span className="text-sm">{step}</span>
-        )}
-      </motion.div>
+        {status === "complete" ? <CheckIcon className="h-4 w-4" /> : step}
+      </div>
     </motion.div>
   );
 }
 
 function StepConnector({ isComplete }) {
-  const lineVariants = {
-    incomplete: { width: 0, backgroundColor: "transparent" },
-    complete: { width: "100%", backgroundColor: "#3B82F6" },
-  };
-
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
+    <div className="flex flex-1 items-center justify-center">
       <motion.div
-        className="absolute left-0 top-0 h-full"
-        variants={lineVariants}
-        initial={false}
-        animate={isComplete ? "complete" : "incomplete"}
+        className={`h-0.5 w-full bg-gray-700`}
+        animate={{ backgroundColor: isComplete ? "#22c55e" : undefined }}
         transition={{ duration: 0.4 }}
       />
     </div>
@@ -297,15 +293,15 @@ function CheckIcon(props) {
     <svg
       {...props}
       fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
       viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={3}
     >
       <motion.path
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
         transition={{
-          delay: 0.1,
+          delay: 0.2,
           type: "tween",
           ease: "easeOut",
           duration: 0.3,

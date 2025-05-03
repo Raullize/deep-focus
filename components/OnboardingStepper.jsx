@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Stepper, { Step } from './Stepper';
+import Stepper, { Step } from './ui/Stepper';
 import { motion } from 'framer-motion';
 
 const OnboardingStepper = ({ onComplete, forceShow = false }) => {
