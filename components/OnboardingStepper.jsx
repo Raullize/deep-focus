@@ -8,33 +8,27 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Se forceShow for true, mostrar o onboarding independentemente
     if (forceShow) {
       setIsOpen(true);
       return;
     }
     
     try {
-      // Verificar no localStorage se o onboarding já foi mostrado
       const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
       
       if (hasSeenOnboarding !== 'true') {
-        // Se for a primeira visita, mostrar o onboarding
         setIsOpen(true);
       }
     } catch (error) {
-      console.error('Erro ao acessar localStorage:', error);
-      // Em caso de erro de acesso ao localStorage, mostrar de qualquer forma
       setIsOpen(true);
     }
   }, [forceShow]);
 
   const handleComplete = () => {
-    // Marcar que o usuário já viu o onboarding
     try {
       localStorage.setItem('hasSeenOnboarding', 'true');
     } catch (error) {
-      console.error('Erro ao salvar no localStorage:', error);
+      // Silently fail if localStorage is not available
     }
     setIsOpen(false);
     if (onComplete) onComplete();

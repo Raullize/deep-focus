@@ -28,7 +28,6 @@ const getSavedSettings = () => {
     
     return { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
   } catch (e) {
-    console.error('Error loading settings:', e);
     return DEFAULT_SETTINGS;
   }
 };
@@ -119,21 +118,20 @@ export default function useTimer() {
         const soundPath = `/notifications/${settings.notificationSound}.mp3?t=${timestamp}`;
         
         audioRef.current.oncanplaythrough = () => {
-          // Removendo o console.log desnecessário
+          // Removido
         };
         
         audioRef.current.onerror = (e) => {
-          console.warn(`Could not load audio: ${settings.notificationSound}`, e.target.error);
-            if ('Notification' in window && settings.soundEnabled) {
-              Notification.requestPermission();
-            }
+          if ('Notification' in window && settings.soundEnabled) {
+            Notification.requestPermission();
+          }
         };
         
         audioRef.current.src = soundPath;
         audioRef.current.load();
       } catch (error) {
-        console.error("Error setting up audio:", error);
-    }
+        // Erro ao configurar áudio - simplesmente continua sem notificação
+      }
     };
     
     if (settings.soundEnabled) {
@@ -170,7 +168,7 @@ export default function useTimer() {
         totalTime: newTime
       });
     } catch (error) {
-      console.error('Error updating time:', error);
+      // Em caso de erro, voltar para valores padrão
       setTime(25 * 60);
       setTotalTime(25 * 60);
       updateTimerState({
@@ -187,7 +185,7 @@ export default function useTimer() {
       try {
         localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
       } catch (error) {
-      console.error('Error saving settings:', error);
+      // Erro ao salvar configurações - simplesmente continua
     }
   }, [settings]);
 
@@ -277,7 +275,6 @@ export default function useTimer() {
           
           if (playPromise !== undefined) {
             playPromise.catch(error => {
-              console.warn("Could not play sound:", error);
               showBrowserNotification(currentMode);
             });
           }
@@ -288,7 +285,6 @@ export default function useTimer() {
         showBrowserNotification(currentMode);
       }
     } catch (error) {
-      console.error("Error playing notification:", error);
       showBrowserNotification(currentMode);
     }
   }, []);
@@ -296,11 +292,11 @@ export default function useTimer() {
   // Show browser notification as fallback
   const showBrowserNotification = useCallback((currentMode) => {
     if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('DeepFocus', { 
+      new Notification('DeepFocus', { 
         body: currentMode === TIMER_MODES.FOCUS ? 'Time to take a break!' : 'Time to focus!',
-                icon: '/favicon.ico'
-              });
-            }
+        icon: '/favicon.ico'
+      });
+    }
   }, []);
           
   // Handle timer completion and mode switching
@@ -317,13 +313,13 @@ export default function useTimer() {
       if (currentCycle >= currentSettings.cyclesPerRound) {
         nextMode = TIMER_MODES.LONG_BREAK;
         nextCycle = 1;
-            } else {
+      } else {
         nextMode = TIMER_MODES.SHORT_BREAK;
         nextCycle = currentCycle + 1;
-            }
-          } else {
+      }
+    } else {
       nextMode = TIMER_MODES.FOCUS;
-          }
+    }
           
     // Resetar o timer
     targetEndTimeRef.current = 0;
@@ -344,7 +340,7 @@ export default function useTimer() {
     if (!currentSettings.autoStartNextCycle) {
       updates.isActive = false;
       setIsActive(false);
-          } else {
+    } else {
       // Pequeno atraso para garantir que os outros estados sejam atualizados primeiro
       setTimeout(() => {
         setIsActive(true);
@@ -420,20 +416,20 @@ export default function useTimer() {
     setTimeout(() => {
       if (currentMode === TIMER_MODES.FOCUS) {
         if (currentCycle >= currentSettings.cyclesPerRound) {
-        setMode(TIMER_MODES.LONG_BREAK);
-        setCycle(1);
+          setMode(TIMER_MODES.LONG_BREAK);
+          setCycle(1);
           updateTimerState({
             mode: TIMER_MODES.LONG_BREAK,
             cycle: 1
           });
-      } else {
-        setMode(TIMER_MODES.SHORT_BREAK);
+        } else {
+          setMode(TIMER_MODES.SHORT_BREAK);
           updateTimerState({
             mode: TIMER_MODES.SHORT_BREAK
           });
-      }
+        }
       } else if (currentMode === TIMER_MODES.SHORT_BREAK) {
-      setMode(TIMER_MODES.FOCUS);
+        setMode(TIMER_MODES.FOCUS);
         const newCycle = currentCycle + 1;
         setCycle(newCycle);
         updateTimerState({
@@ -441,13 +437,13 @@ export default function useTimer() {
           cycle: newCycle
         });
       } else {
-      setMode(TIMER_MODES.FOCUS);
-      setCycle(1);
+        setMode(TIMER_MODES.FOCUS);
+        setCycle(1);
         updateTimerState({
           mode: TIMER_MODES.FOCUS,
           cycle: 1
         });
-    }
+      }
     }, 0);
   }, [updateTimerState]);
 
@@ -482,7 +478,7 @@ export default function useTimer() {
     // Atualizações de estado em um setTimeout para evitar loops
     setTimeout(() => {
       // Atualizar configurações
-    setSettings(validatedSettings);
+      setSettings(validatedSettings);
     
       // Reiniciar o timer
       setIsActive(false);
@@ -502,12 +498,7 @@ export default function useTimer() {
       
       setTime(newTime);
       setTotalTime(newTime);
-      
-      // Atualizar o ref
       updateTimerState({
-        settings: validatedSettings,
-        isActive: false,
-        cycle: 1,
         time: newTime,
         totalTime: newTime
       });
@@ -526,6 +517,6 @@ export default function useTimer() {
     startTimer,
     pauseTimer,
     resetTimer,
-    skipToNext,
+    skipToNext
   };
 } 
