@@ -102,23 +102,30 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           </div>
         </motion.div>
         
-        {/* Barra de progresso com mesmas cores do tema */}
-        <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
-          <motion.div 
-            className="h-full rounded-full"
-            style={{
-              background: `linear-gradient(to right, ${PARTICLE_COLORS[0]}, ${PARTICLE_COLORS[1]}, ${PARTICLE_COLORS[2]})`
-            }}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.2 }}
-          />
-        </div>
-        
-        {/* Porcentagem - Agora com o texto à esquerda e o valor à direita */}
-        <div className="w-full flex justify-between text-sm text-gray-400 mb-8">
-          <span>{t('loading')}</span>
-          <span>{Math.floor(progress)}%</span>
+        {/* Container para barra de progresso e textos */}
+        <div className="w-full">
+          {/* Barra de progresso */}
+          <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
+            <motion.div 
+              className="h-full rounded-full"
+              style={{
+                background: `linear-gradient(to right, ${PARTICLE_COLORS[0]}, ${PARTICLE_COLORS[1]}, ${PARTICLE_COLORS[2]})`
+              }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.2 }}
+            />
+          </div>
+          
+          {/* Container para texto e porcentagem - implementação simplificada */}
+          <table className="w-full mb-8">
+            <tbody>
+              <tr>
+                <td className="text-sm text-gray-400 text-left w-1/2">{t('loading')}</td>
+                <td className="text-sm text-gray-400 text-right w-1/2">{Math.floor(progress)}%</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         
         {/* Mensagens de Loading */}
