@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import GradientText from './GradientText'
+import useTranslation from '../../i18n/useTranslation'
 
 // Mantendo consistência com as cores da aplicação
 const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"] // Blue, Purple, Pink
 
 const LoadingScreen = ({ onLoadingComplete }) => {
+  const { t, language } = useTranslation()
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [preloadStarted, setPreloadStarted] = useState(false)
@@ -96,7 +98,7 @@ const LoadingScreen = ({ onLoadingComplete }) => {
             >
               DeepFocus
             </GradientText>
-            <p className="text-gray-400 text-center mt-2">Maximize sua produtividade</p>
+            <p className="text-gray-400 text-center mt-2">{t('tagline')}</p>
           </div>
         </motion.div>
         
@@ -113,9 +115,9 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           />
         </div>
         
-        {/* Porcentagem */}
+        {/* Porcentagem - Agora com o texto à esquerda e o valor à direita */}
         <div className="w-full flex justify-between text-sm text-gray-400 mb-8">
-          <span>Carregando...</span>
+          <span>{t('loading')}</span>
           <span>{Math.floor(progress)}%</span>
         </div>
         
@@ -127,16 +129,16 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           className="text-center text-gray-300"
         >
           {progress < 30 && (
-            <p>Preparando ambiente</p>
+            <p>{t('preparingEnvironment')}</p>
           )}
           {progress >= 30 && progress < 60 && (
-            <p>Carregando recursos</p>
+            <p>{t('loadingResources')}</p>
           )}
           {progress >= 60 && progress < 90 && (
-            <p>Iniciando temporizadores</p>
+            <p>{t('startingTimers')}</p>
           )}
           {progress >= 90 && (
-            <p>Quase pronto...</p>
+            <p>{t('almostReady')}</p>
           )}
         </motion.div>
       </div>

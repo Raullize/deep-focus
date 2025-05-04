@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Stepper, { Step } from './ui/Stepper';
 import { motion } from 'framer-motion';
+import useTranslation from '../i18n/useTranslation';
 
 const OnboardingStepper = ({ onComplete, forceShow = false }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
       >
         <Step>
           <div className="flex flex-col items-center">
-            <h2 className="text-2xl font-bold text-primary mb-4">Bem-vindo ao DeepFocus!</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4">{t('onboarding.welcome')}</h2>
             <img 
               src="/illustrations/pomodoro.svg" 
               alt="Pomodoro Timer" 
@@ -59,62 +61,62 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
               onError={(e) => { e.target.src = '/favicon.ico'; e.target.className = "w-16 h-16 mb-4"; }}
             />
             <p className="text-center mb-2">
-              O DeepFocus é um temporizador baseado na técnica Pomodoro para aumentar sua produtividade e foco.
+              {t('onboarding.welcomeDescription')}
             </p>
             <p className="text-center text-sm text-gray-400">
-              Continue para aprender como usar.
+              {t('onboarding.continueToLearn')}
             </p>
           </div>
         </Step>
 
         <Step>
           <div className="flex flex-col items-center">
-            <h2 className="text-xl font-bold text-blue-400 mb-4">Como funciona a técnica Pomodoro</h2>
+            <h2 className="text-xl font-bold text-blue-400 mb-4">{t('onboarding.howItWorks')}</h2>
             <div className="space-y-2 mb-4">
               <div className="flex items-start">
                 <div className="bg-primary/20 rounded-full p-1 mr-2 mt-1">
                   <span className="block h-2 w-2 rounded-full bg-primary"></span>
                 </div>
-                <p>Trabalhe com <span className="text-primary font-medium">blocos de foco</span> (padrão: 25 minutos)</p>
+                <p>{t('onboarding.focusBlocks')}</p>
               </div>
               <div className="flex items-start">
                 <div className="bg-primary/20 rounded-full p-1 mr-2 mt-1">
                   <span className="block h-2 w-2 rounded-full bg-primary"></span>
                 </div>
-                <p>Faça <span className="text-green-400 font-medium">pausas curtas</span> entre blocos (padrão: 5 minutos)</p>
+                <p>{t('onboarding.shortBreaks')}</p>
               </div>
               <div className="flex items-start">
                 <div className="bg-primary/20 rounded-full p-1 mr-2 mt-1">
                   <span className="block h-2 w-2 rounded-full bg-primary"></span>
                 </div>
-                <p>Após 4 blocos, faça uma <span className="text-indigo-400 font-medium">pausa longa</span> (padrão: 15 minutos)</p>
+                <p>{t('onboarding.longBreaks')}</p>
               </div>
             </div>
             <p className="text-center text-sm text-gray-400">
-              Todos os tempos são personalizáveis nas configurações.
+              {t('onboarding.customizableTimes')}
             </p>
           </div>
         </Step>
 
         <Step>
           <div className="flex flex-col items-center">
-            <h2 className="text-xl font-bold text-yellow-400 mb-4">Dicas para melhorar seu foco</h2>
+            <h2 className="text-xl font-bold text-yellow-400 mb-4">{t('onboarding.tips')}</h2>
             <div className="space-y-3 mb-4 max-w-[350px]">
               <div className="flex items-start">
                 <span className="text-yellow-400 mr-2">💧</span>
-                <p>Mantenha uma garrafa de água por perto e hidrate-se regularmente</p>
+                <p>{t('onboarding.tipHydrate')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-yellow-400 mr-2">📵</span>
-                <p>Evite redes sociais e notificações durante os blocos de foco</p>
+                <p>{t('onboarding.tipNotifications')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-yellow-400 mr-2">📝</span>
-                <p>Defina claramente o que deseja realizar em cada bloco de foco</p>
+                <p>{t('onboarding.tipDefineGoals')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-yellow-400 mr-2">🧘</span>
-                <p>Use as pausas para alongar-se e relaxar a mente</p>
+                <p>{t('onboarding.tipRelax')}</p>
               </div>
             </div>
           </div>
@@ -122,36 +124,36 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
 
         <Step>
           <div className="flex flex-col items-center">
-            <h2 className="text-xl font-bold text-green-400 mb-4">Controles do DeepFocus</h2>
+            <h2 className="text-xl font-bold text-green-400 mb-4">{t('onboarding.controls')}</h2>
             <div className="space-y-3 mb-4 max-w-[350px]">
               <div className="flex items-start">
                 <span className="text-primary mr-2">⏱️</span>
-                <p>Use os botões <span className="font-medium">Iniciar</span>, <span className="font-medium">Pausar</span>, <span className="font-medium">Reiniciar</span> e <span className="font-medium">Pular</span> para controlar o timer</p>
+                <p>{t('onboarding.controlsTimer')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-primary mr-2">⚙️</span>
-                <p>Personalize os tempos e as notificações nas <span className="font-medium">Configurações</span></p>
+                <p>{t('onboarding.controlsSettings')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-primary mr-2">🔍</span>
-                <p>Ative o <span className="font-medium">Modo Foco</span> para uma interface minimalista</p>
+                <p>{t('onboarding.controlsFocusMode')}</p>
               </div>
               <div className="flex items-start">
                 <span className="text-primary mr-2">⌨️</span>
-                <p>Use os atalhos de teclado para controle rápido</p>
+                <p>{t('onboarding.controlsKeyboard')}</p>
               </div>
             </div>
             <p className="text-center text-sm text-gray-400">
-              Você está pronto para começar! Clique em Concluir abaixo.
+              {t('onboarding.readyToStart')}
             </p>
           </div>
         </Step>
 
         <Step>
           <div className="flex flex-col items-center">
-            <h2 className="text-xl font-bold text-purple-400 mb-4">Desenvolvido por Raul Lize</h2>
+            <h2 className="text-xl font-bold text-purple-400 mb-4">{t('onboarding.about')}</h2>
             <p className="text-center mb-4">
-              Obrigado por usar o DeepFocus! Se você tiver alguma dúvida ou sugestão, entre em contato.
+              {t('onboarding.thankYou')}
             </p>
             <div className="flex space-x-4 mb-2">
               <a 

@@ -34,5 +34,39 @@
   "focusMode": "Focus Mode",
   "exitFocusMode": "Exit Focus Mode",
   "help": "Help",
-  "helpTip": "View tutorial"
+  "helpTip": "View tutorial",
+  "loading": "Loading...",
+  "preparingEnvironment": "Preparing environment",
+  "loadingResources": "Loading resources",
+  "startingTimers": "Starting timers",
+  "almostReady": "Almost ready...",
+  "tagline": "Maximize your productivity",
+
+  "onboarding": {
+    "welcome": "Welcome to DeepFocus!",
+    "welcomeDescription": "DeepFocus is a timer based on the Pomodoro technique to enhance your productivity and focus.",
+    "continueToLearn": "Continue to learn how to use it.",
+    
+    "howItWorks": "How the Pomodoro technique works",
+    "focusBlocks": "Work in focus blocks (default: 25 minutes)",
+    "shortBreaks": "Take short breaks between blocks (default: 5 minutes)",
+    "longBreaks": "After 4 blocks, take a long break (default: 15 minutes)",
+    "customizableTimes": "All times are customizable in settings.",
+    
+    "tips": "Tips to improve your focus",
+    "tipHydrate": "Keep a water bottle nearby and stay hydrated regularly",
+    "tipNotifications": "Avoid social media and notifications during focus blocks",
+    "tipDefineGoals": "Clearly define what you want to accomplish in each focus block",
+    "tipRelax": "Use breaks to stretch and relax your mind",
+    
+    "controls": "DeepFocus Controls",
+    "controlsTimer": "Use the Start, Pause, Reset and Skip buttons to control the timer",
+    "controlsSettings": "Customize times and notifications in Settings",
+    "controlsFocusMode": "Activate Focus Mode for a minimalist interface",
+    "controlsKeyboard": "Use keyboard shortcuts for quick control",
+    "readyToStart": "You're ready to start! Click Complete below.",
+    
+    "about": "Developed by Raul Lize",
+    "thankYou": "Thank you for using DeepFocus! If you have any questions or suggestions, please get in touch."
+  }
 } 

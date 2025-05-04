@@ -34,5 +34,39 @@
   "focusMode": "Modo Foco",
   "exitFocusMode": "Sair do Modo Foco",
   "help": "Ajuda",
-  "helpTip": "Ver tutorial"
+  "helpTip": "Ver tutorial",
+  "loading": "Carregando...",
+  "preparingEnvironment": "Preparando ambiente",
+  "loadingResources": "Carregando recursos",
+  "startingTimers": "Iniciando temporizadores",
+  "almostReady": "Quase pronto...",
+  "tagline": "Maximize sua produtividade",
+
+  "onboarding": {
+    "welcome": "Bem-vindo ao DeepFocus!",
+    "welcomeDescription": "O DeepFocus é um temporizador baseado na técnica Pomodoro para aumentar sua produtividade e foco.",
+    "continueToLearn": "Continue para aprender como usar.",
+    
+    "howItWorks": "Como funciona a técnica Pomodoro",
+    "focusBlocks": "Trabalhe com blocos de foco (padrão: 25 minutos)",
+    "shortBreaks": "Faça pausas curtas entre blocos (padrão: 5 minutos)",
+    "longBreaks": "Após 4 blocos, faça uma pausa longa (padrão: 15 minutos)",
+    "customizableTimes": "Todos os tempos são personalizáveis nas configurações.",
+    
+    "tips": "Dicas para melhorar seu foco",
+    "tipHydrate": "Mantenha uma garrafa de água por perto e hidrate-se regularmente",
+    "tipNotifications": "Evite redes sociais e notificações durante os blocos de foco",
+    "tipDefineGoals": "Defina claramente o que deseja realizar em cada bloco de foco",
+    "tipRelax": "Use as pausas para alongar-se e relaxar a mente",
+    
+    "controls": "Controles do DeepFocus",
+    "controlsTimer": "Use os botões Iniciar, Pausar, Reiniciar e Pular para controlar o timer",
+    "controlsSettings": "Personalize os tempos e as notificações nas Configurações",
+    "controlsFocusMode": "Ative o Modo Foco para uma interface minimalista",
+    "controlsKeyboard": "Use os atalhos de teclado para controle rápido",
+    "readyToStart": "Você está pronto para começar! Clique em Concluir abaixo.",
+    
+    "about": "Desenvolvido por Raul Lize",
+    "thankYou": "Obrigado por usar o DeepFocus! Se você tiver alguma dúvida ou sugestão, entre em contato."
+  }
 } 
