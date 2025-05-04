@@ -106,13 +106,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Força a atualização do lang do HTML quando o idioma mudar
-  useEffect(() => {
-    if (isInitialized && typeof document !== 'undefined') {
-      document.documentElement.lang = language;
-    }
-  }, [language, isInitialized]);
-
   // Responder ao evento de pré-carregamento disparado pelo LoadingScreen
   useEffect(() => {
     if (!mounted) return;

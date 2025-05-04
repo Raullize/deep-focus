@@ -7,6 +7,8 @@ const LanguageContext = createContext(null)
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('pt')
   const [isInitialized, setIsInitialized] = useState(false)
+  // Flag para controlar se está na fase de hidratação
+  const [isHydrating, setIsHydrating] = useState(true)
 
   // Efeito para carregar o idioma do localStorage
   useEffect(() => {
@@ -18,25 +20,28 @@ export function LanguageProvider({ children }) {
         }
         // Marca como inicializado para evitar flickering
         setIsInitialized(true)
+        // Marca que a hidratação inicial foi concluída
+        setIsHydrating(false)
       } catch (error) {
         console.error('Error accessing localStorage:', error)
         setIsInitialized(true)
+        setIsHydrating(false)
       }
     }
   }, [])
 
   // Efeito para salvar o idioma no localStorage sempre que mudar
   useEffect(() => {
-    if (typeof window !== 'undefined' && isInitialized) {
+    if (typeof window !== 'undefined' && isInitialized && !isHydrating) {
       try {
         localStorage.setItem('language', language)
-        // Atualiza o atributo lang do HTML para refletir a mudança de idioma
+        // Só atualiza o atributo lang depois da hidratação inicial
         document.documentElement.lang = language
       } catch (error) {
         console.error('Error saving to localStorage:', error)
       }
     }
-  }, [language, isInitialized])
+  }, [language, isInitialized, isHydrating])
 
   const toggleLanguage = () => {
     setLanguage(prevLang => prevLang === 'pt' ? 'en' : 'pt')
