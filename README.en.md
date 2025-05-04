@@ -105,5 +105,4 @@ yarn test
 
 ## 🙏 Acknowledgements
 
-- Thank you to everyone who uses this application to improve their productivity
-- Inspired by the [Pomodoro Technique](https://francescocirillo.com/pages/pomodoro-technique) created by Francesco Cirillo 
+- Thank you to everyone who uses this application to improve their productivity 

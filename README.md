@@ -106,4 +106,3 @@ yarn test
 ## 🙏 Agradecimentos
 
 - Obrigado a todos que utilizam este aplicativo para melhorar sua produtividade
-- Inspirado pela [Técnica Pomodoro](https://francescocirillo.com/pages/pomodoro-technique) criada por Francesco Cirillo 
