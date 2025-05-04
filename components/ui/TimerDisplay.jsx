@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const CIRCLE_RADIUS = 116
 const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS
@@ -13,10 +13,18 @@ const GRADIENT_COLORS = {
 
 const TimerDisplay = ({ time, totalTime, mode }) => {
   const [displayTime, setDisplayTime] = useState("25:00")
+  const [rendered, setRendered] = useState(false)
+  const circleRef = useRef(null)
   
   const progressPercentage = totalTime > 0 ? (time / totalTime) * 100 : 0
   const colors = GRADIENT_COLORS[mode] || GRADIENT_COLORS.focus
 
+  // Efeito para marcar o componente como renderizado após montagem
+  useEffect(() => {
+    setRendered(true)
+  }, [])
+
+  // Atualiza o tempo exibido quando o time mudar
   useEffect(() => {
     const safeTime = typeof time === 'number' && !isNaN(time) ? time : 1500
     const roundedTime = Math.ceil(safeTime)
@@ -33,6 +41,13 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
     
     setDisplayTime(formatted)
   }, [time])
+
+  // Atualiza o círculo de progresso diretamente via DOM para melhor performance
+  useEffect(() => {
+    if (circleRef.current && rendered) {
+      circleRef.current.style.strokeDashoffset = CIRCUMFERENCE * (1 - progressPercentage / 100)
+    }
+  }, [progressPercentage, rendered])
 
   return (
     <div className="text-center relative">
@@ -69,6 +84,7 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
           </defs>
           
           <circle
+            ref={circleRef}
             cx="125"
             cy="125"
             r={CIRCLE_RADIUS}
@@ -78,7 +94,6 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
             strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={CIRCUMFERENCE * (1 - progressPercentage / 100)}
-            style={{ transition: 'none' }}
             filter="url(#glow)"
           />
         </svg>
