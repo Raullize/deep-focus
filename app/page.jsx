@@ -382,16 +382,32 @@ export default function Home() {
       return (
         <div className="w-full text-center text-xs mt-4 mb-0 opacity-70 hidden md:block">
           <p className="mb-1">{t('shortcuts')}</p>
-          <p>
-            <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">M</span> {t('focusMode')} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">H</span> {t('help') || "Ajuda"} |
-            <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
-          </p>
+          <div className="flex flex-wrap justify-center gap-x-2 gap-y-2 px-2">
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mr-1">{t('spaceKey')}</span> {t('startPause')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">R</span> {t('reset')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">N</span> {t('next')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">S</span> {t('settings')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">F</span> {t('fullscreen')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">M</span> {t('focusMode')}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">H</span> {t('help') || "Ajuda"}
+            </div>
+            <div className="whitespace-nowrap">
+              <span className="bg-gray-800 px-2 py-1 rounded mx-1">ESC</span> {t('closeModal')}
+            </div>
+          </div>
         </div>
       )
     }
