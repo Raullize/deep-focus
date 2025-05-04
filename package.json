@@ -1,6 +1,9 @@
 {
   "name": "deep-focus",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Um aplicativo de temporizador Pomodoro para maximizar sua produtividade e foco, com interface moderna e recursos personalizáveis.",
+  "keywords": ["pomodoro", "temporizador", "produtividade", "foco", "gerenciamento de tempo", "técnica pomodoro", "next.js", "react"],
+  "author": "Raul Lize <raullizeteixeira@gmail.com> (https://raul-lize-portfolio.vercel.app)",
   "private": true,
   "scripts": {
     "dev": "next dev",
