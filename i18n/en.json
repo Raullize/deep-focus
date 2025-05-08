@@ -41,7 +41,7 @@
   "startingTimers": "Starting timers",
   "almostReady": "Almost ready...",
   "tagline": "Maximize your productivity",
-  "mobileWarning": "This version of DeepFocus doesn't play sounds in the background on mobile devices yet. We're working on fixing this in future updates.",
+  "mobileWarning": "Background notifications may vary between mobile devices in the current version. Future updates aim to make this compatibility more stable.",
 
   "onboarding": {
     "welcome": "Welcome to DeepFocus!",
@@ -59,6 +59,7 @@
     "tipNotifications": "Avoid social media and notifications during focus blocks",
     "tipDefineGoals": "Clearly define what you want to accomplish in each focus block",
     "tipRelax": "Use breaks to stretch and relax your mind",
+    "notificationPermission": "To receive alerts and sound in the background, accept browser notifications when prompted",
     
     "controls": "DeepFocus Controls",
     "controlsTimer": "Use the Start, Pause, Reset and Skip buttons to control the timer",

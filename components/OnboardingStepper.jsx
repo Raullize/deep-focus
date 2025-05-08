@@ -118,6 +118,10 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
                 <span className="text-yellow-400 mr-2">🧘</span>
                 <p>{t('onboarding.tipRelax')}</p>
               </div>
+              <div className="flex items-start">
+                <span className="text-yellow-400 mr-2">🔔</span>
+                <p>{t('onboarding.notificationPermission')}</p>
+              </div>
             </div>
           </div>
         </Step>
@@ -143,7 +147,7 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
                 <p>{t('onboarding.controlsKeyboard')}</p>
               </div>
             </div>
-            <p className="text-center text-sm text-gray-400">
+            <p className="text-center text-sm text-gray-400 mt-3">
               {t('onboarding.readyToStart')}
             </p>
           </div>

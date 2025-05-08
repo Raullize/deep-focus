@@ -41,7 +41,7 @@
   "startingTimers": "Iniciando temporizadores",
   "almostReady": "Quase pronto...",
   "tagline": "Maximize sua produtividade",
-  "mobileWarning": "Esta versão do DeepFocus ainda não reproduz som em segundo plano no celular. Estamos trabalhando para resolver isso em futuras atualizações.",
+  "mobileWarning": "A reprodução de notificações em segundo plano pode variar entre dispositivos móveis na versão atual. Futuras atualizações buscam deixar essa compatibilidade mais estável.",
 
   "onboarding": {
     "welcome": "Bem-vindo ao DeepFocus!",
@@ -59,6 +59,7 @@
     "tipNotifications": "Evite redes sociais e notificações durante os blocos de foco",
     "tipDefineGoals": "Defina claramente o que deseja realizar em cada bloco de foco",
     "tipRelax": "Use as pausas para alongar-se e relaxar a mente",
+    "notificationPermission": "Para receber alertas e som em segundo plano, aceite as notificações do navegador quando solicitado",
     
     "controls": "Controles do DeepFocus",
     "controlsTimer": "Use os botões Iniciar, Pausar, Reiniciar e Pular para controlar o timer",
