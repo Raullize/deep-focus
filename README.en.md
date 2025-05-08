@@ -32,7 +32,7 @@ The Pomodoro Technique is a time management method that uses alternating periods
 
 - **Desktop Version (Web)**: Full functionality including sound and system notifications even when the tab is in the background or the browser is minimized.
 
-- **Mobile Version**: Due to limitations imposed by mobile browsers for battery saving and performance, it is currently **not possible to play sounds in the background** when the app is not in focus or the device is locked.
+- **Mobile Version**: Background notifications may vary between mobile devices in the current version. Behavior depends on the browser and energy-saving settings of each device.
 
 ### Mobile Version Roadmap
 
