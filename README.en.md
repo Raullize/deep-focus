@@ -26,6 +26,28 @@ The Pomodoro Technique is a time management method that uses alternating periods
 - 🔍 **Fullscreen Mode**: Eliminate distractions and focus only on the timer
 - 💾 **Persistence**: Your settings are automatically saved
 
+## ⚠️ Limitations and Future Plans
+
+### Desktop vs Mobile Version
+
+- **Desktop Version (Web)**: Full functionality including sound and system notifications even when the tab is in the background or the browser is minimized.
+
+- **Mobile Version**: Due to limitations imposed by mobile browsers for battery saving and performance, it is currently **not possible to play sounds in the background** when the app is not in focus or the device is locked.
+
+### Mobile Version Roadmap
+
+We are working to address the mobile version limitations in future updates:
+
+- Development of a dedicated native app for iOS and Android
+- Implementation of push notifications to work around background audio restrictions
+- Battery consumption optimizations while maintaining full functionality
+
+### Compatibility
+
+For the best experience with DeepFocus, we recommend:
+- **Desktop/laptop devices**: Recent versions of Chrome, Firefox, Edge, or Safari
+- **Mobile devices**: Use with the screen active, until future updates address background audio limitations
+
 ## 🛠️ Technologies
 
 - **[React 18](https://reactjs.org/)**: JavaScript library for building interfaces
@@ -33,6 +55,8 @@ The Pomodoro Technique is a time management method that uses alternating periods
 - **[Tailwind CSS](https://tailwindcss.com/)**: CSS framework for rapid and responsive design
 - **[Framer Motion](https://www.framer.com/motion/)**: Library for fluid animations
 - **[LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)**: For user data persistence
+- **[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)**: For reliable background audio playback
+- **[Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API)**: For system notifications
 
 ## ⌨️ Keyboard Shortcuts
 
