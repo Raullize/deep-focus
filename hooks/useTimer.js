@@ -40,10 +40,13 @@ export default function useTimer() {
   const [isActive, setIsActive] = useState(false);
   const [cycle, setCycle] = useState(1);
   const [totalTime, setTotalTime] = useState(DEFAULT_SETTINGS.focusTime * 60);
+  const [notificationPermission, setNotificationPermission] = useState('default');
   
   // Pure Refs (not connected to state)
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const audioBufferRef = useRef(null);
   const initializedRef = useRef(false);
   const targetEndTimeRef = useRef(0);
   const timerStateRef = useRef({
@@ -54,6 +57,8 @@ export default function useTimer() {
     settings: DEFAULT_SETTINGS,
     totalTime: DEFAULT_SETTINGS.focusTime * 60
   });
+  const audioUnlocked = useRef(false);
+  const audioInitializationAttempted = useRef(false);
   
   // Função para sincronizar o estado do React com os refs
   const syncStateFromRef = useCallback(() => {
@@ -104,33 +109,153 @@ export default function useTimer() {
     });
   }, [time, isActive, mode, cycle, settings, totalTime, updateTimerState]);
 
-  // Audio notification setup
+  // Check notification permission on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  // Request notification permission
+  const requestNotificationPermission = useCallback(async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        try {
+          const permission = await Notification.requestPermission();
+          setNotificationPermission(permission);
+          return permission;
+        } catch (error) {
+          console.error('Erro ao solicitar permissão de notificação:', error);
+          return 'default';
+        }
+      }
+      return Notification.permission;
+    }
+    return 'default';
+  }, []);
+
+  // Inicializar o AudioContext - Modificado para previnir warning
+  const initAudioContext = useCallback(() => {
+    // Se já foi tentado inicializar e não há interação do usuário, não tente novamente
+    if (audioInitializationAttempted.current && !audioContextRef.current) return;
+    
+    if (typeof window === 'undefined' || !window.AudioContext && !window.webkitAudioContext) return;
+    
+    try {
+      // Só criar o AudioContext se ainda não existe
+      if (!audioContextRef.current) {
+        audioInitializationAttempted.current = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioContextRef.current = new AudioCtx();
+        
+        // Pré-carregar o buffer de áudio
+        const loadSound = async () => {
+          if (settings.soundEnabled && audioContextRef.current) {
+            const timestamp = new Date().getTime();
+            const soundPath = `/notifications/${settings.notificationSound}.mp3?t=${timestamp}`;
+            audioBufferRef.current = await loadAudioBuffer(soundPath);
+          }
+        };
+        
+        loadSound().catch(console.error);
+      }
+      
+      // Se o contexto estiver suspenso (política de autoplay), tentamos retomá-lo
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+    } catch (error) {
+      console.error('Erro ao inicializar AudioContext:', error);
+    }
+  }, [settings.soundEnabled, settings.notificationSound]);
+
+  // Unlock audio for iOS and similar browsers with audio autoplay restrictions
+  const unlockAudio = useCallback(() => {
+    if (audioUnlocked.current) return;
+    
+    try {
+      // Inicialize o AudioContext se ainda não foi feito
+      initAudioContext();
+      
+      // Create and play a silent audio to unlock audio context
+      if (audioContextRef.current) {
+        // Cria um buffer de silêncio
+        const buffer = audioContextRef.current.createBuffer(1, 1, 22050);
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContextRef.current.destination);
+        
+        // Tocar o som (vai destravar o áudio em alguns navegadores)
+        source.start(0);
+        
+        // Também tentamos o método tradicional com o elemento de áudio
+        const silentAudio = new Audio();
+        silentAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABPgD///////////////////////////////////////////8AAAA8TEFNRTMuMTAwAQAAAAAAAAAAABSAJAi4hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/7UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASDEwMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwBK8AAAAAAAAAADUgJAYXQQABrgAAPlD/ywFYAAABAAAAYS8ySgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQRMSBwAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAAQAAAAAAAAAAAAAAAAAAA=';
+        silentAudio.volume = 0.01;
+        silentAudio.loop = false;
+        
+        const playPromise = silentAudio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Audio successfully unlocked
+              audioUnlocked.current = true;
+              silentAudio.pause();
+              silentAudio.src = '';
+            })
+            .catch(error => {
+              // Auto-play was prevented - requires user interaction
+              console.log('Audio auto-play prevented, requires user interaction');
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error unlocking audio:', error);
+    }
+  }, [initAudioContext]);
+
+  // Carregar o buffer de áudio
+  const loadAudioBuffer = useCallback(async (url) => {
+    if (!audioContextRef.current) return null;
+    
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+      return audioBuffer;
+    } catch (error) {
+      console.error('Error loading audio buffer:', error);
+      return null;
+    }
+  }, []);
+
+  // Audio notification setup - Modificado para evitar inicialização automática do AudioContext
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const loadAudio = () => {
+    const loadAudio = async () => {
       try {
+        // Não inicializar automaticamente o AudioContext aqui
+        // Apenas configurar o elemento de áudio tradicional, que é mais seguro
+        
+        // Verificar permissão de notificação
+        if ('Notification' in window && settings.soundEnabled && Notification.permission === 'default') {
+          requestNotificationPermission();
+        }
+        
+        // Método tradicional (fallback)
         if (!audioRef.current) {
-      audioRef.current = new Audio();
+          audioRef.current = new Audio();
         }
         
         const timestamp = new Date().getTime();
         const soundPath = `/notifications/${settings.notificationSound}.mp3?t=${timestamp}`;
         
-        audioRef.current.oncanplaythrough = () => {
-          // Removido
-        };
-        
-        audioRef.current.onerror = (e) => {
-          if ('Notification' in window && settings.soundEnabled) {
-            Notification.requestPermission();
-          }
-        };
-        
         audioRef.current.src = soundPath;
         audioRef.current.load();
       } catch (error) {
-        // Erro ao configurar áudio - simplesmente continua sem notificação
+        console.error('Erro ao configurar áudio:', error);
       }
     };
     
@@ -140,13 +265,11 @@ export default function useTimer() {
     
     return () => {
       if (audioRef.current) {
-        audioRef.current.oncanplaythrough = null;
-        audioRef.current.onerror = null;
         audioRef.current.pause();
         audioRef.current.src = '';
       }
     };
-  }, [settings.soundEnabled, settings.notificationSound]);
+  }, [settings.soundEnabled, settings.notificationSound, requestNotificationPermission]);
 
   // Update timer when mode or settings change
   useEffect(() => {
@@ -188,6 +311,56 @@ export default function useTimer() {
       // Erro ao salvar configurações - simplesmente continua
     }
   }, [settings]);
+  
+  // Verificação do timestamp do último timer expirado (para background)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isActive) return;
+    
+    // Armazenar o tempo alvo no localStorage
+    if (targetEndTimeRef.current > 0) {
+      try {
+        localStorage.setItem('timerEndTime', targetEndTimeRef.current.toString());
+      } catch (error) {
+        // Ignorar erro
+      }
+    }
+    
+    // Checar regularmente se passou do tempo alvo quando em background
+    const checkInterval = setInterval(() => {
+      const now = Date.now();
+      try {
+        const storedEndTime = parseInt(localStorage.getItem('timerEndTime') || '0', 10);
+        
+        // Se já passou do tempo e ainda não foi tratado
+        if (storedEndTime > 0 && now >= storedEndTime && isActive) {
+          // Limpar o tempo armazenado
+          localStorage.removeItem('timerEndTime');
+          
+          // Finalizar o timer manualmente
+          if (intervalRef.current) {
+            cancelAnimationFrame(intervalRef.current);
+            intervalRef.current = null;
+          }
+          
+          // Definir tempo para 0
+          updateTimerState({ time: 0 });
+          syncStateFromRef();
+          
+          // Disparar notificação e som
+          playNotificationSound();
+          
+          // Lidar com a conclusão do timer
+          handleTimerCompletion();
+        }
+      } catch (error) {
+        // Ignorar erro
+      }
+    }, 1000);
+    
+    return () => {
+      clearInterval(checkInterval);
+    };
+  }, [isActive, syncStateFromRef]);
 
   // Timer countdown logic - completamente reconstruído para evitar loops
   useEffect(() => {
@@ -206,6 +379,13 @@ export default function useTimer() {
     // Inicializar o temporizador
     if (targetEndTimeRef.current === 0) {
       targetEndTimeRef.current = Date.now() + timerStateRef.current.time * 1000;
+      
+      // Armazenar também no localStorage para detecção em background
+      try {
+        localStorage.setItem('timerEndTime', targetEndTimeRef.current.toString());
+      } catch (error) {
+        // Ignorar erro
+      }
     }
     
     // Função de atualização do temporizador - manipula apenas refs, não state
@@ -231,6 +411,13 @@ export default function useTimer() {
         if (intervalRef.current) {
           cancelAnimationFrame(intervalRef.current);
           intervalRef.current = null;
+        }
+        
+        // Limpar o tempo armazenado no localStorage
+        try {
+          localStorage.removeItem('timerEndTime');
+        } catch (error) {
+          // Ignorar erro
         }
         
         // Sincronizar uma última vez
@@ -267,38 +454,72 @@ export default function useTimer() {
     
     if (!currentSettings.soundEnabled) return;
     
+    // 1. Mostrar notificação do navegador se permitido
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        const notification = new Notification('DeepFocus', { 
+          body: currentMode === TIMER_MODES.FOCUS ? 'Time to take a break!' : 'Time to focus!',
+          icon: '/favicon.ico',
+          silent: true // Desativar o som padrão da notificação
+        });
+        
+        // Fechar notificação após alguns segundos
+        setTimeout(() => notification.close(), 5000);
+      } catch (error) {
+        console.error('Erro ao mostrar notificação:', error);
+      }
+    }
+    
+    // 2. Reproduzir som usando Web Audio API (melhor para background)
     try {
-      if (audioRef.current) {
-        if (audioRef.current.readyState >= 2) {
-          audioRef.current.currentTime = 0;
-          const playPromise = audioRef.current.play();
-          
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              showBrowserNotification(currentMode);
-            });
-          }
-        } else {
-          showBrowserNotification(currentMode);
+      if (audioContextRef.current && audioBufferRef.current) {
+        // Retomar o contexto de áudio se estiver suspenso
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
         }
-      } else {
-        showBrowserNotification(currentMode);
+        
+        // Criar source node
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = audioBufferRef.current;
+        
+        // Conectar ao destino (alto-falantes)
+        source.connect(audioContextRef.current.destination);
+        
+        // Definir volume
+        const gainNode = audioContextRef.current.createGain();
+        gainNode.gain.value = 1.0; // volume máximo
+        source.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        // Reproduzir o som
+        source.start(0);
+        
+        return; // Se Web Audio API funcionou, não precisamos do fallback
       }
     } catch (error) {
-      showBrowserNotification(currentMode);
+      console.error('Erro ao reproduzir som com Web Audio API:', error);
+    }
+    
+    // 3. Fallback: usar elemento de áudio tradicional
+    try {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.volume = 1.0;
+        
+        // Tentar forçar a reprodução do áudio
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error('Erro ao reproduzir áudio com elemento HTML:', error);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao reproduzir som de notificação:', error);
     }
   }, []);
 
-  // Show browser notification as fallback
-  const showBrowserNotification = useCallback((currentMode) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('DeepFocus', { 
-        body: currentMode === TIMER_MODES.FOCUS ? 'Time to take a break!' : 'Time to focus!',
-        icon: '/favicon.ico'
-      });
-    }
-  }, []);
-          
   // Handle timer completion and mode switching
   const handleTimerCompletion = useCallback(() => {
     const currentState = timerStateRef.current;
@@ -323,6 +544,13 @@ export default function useTimer() {
           
     // Resetar o timer
     targetEndTimeRef.current = 0;
+    
+    // Limpar localStorage
+    try {
+      localStorage.removeItem('timerEndTime');
+    } catch (error) {
+      // Ignorar erro
+    }
     
     // Atualizar estado apenas quando houver mudanças
     let updates = {};
@@ -356,14 +584,32 @@ export default function useTimer() {
 
   // Timer control functions
   const startTimer = useCallback(() => {
+    // Desbloquear áudio ao iniciar o timer (necessário para iOS/Safari)
+    unlockAudio();
+    
+    // Inicializar AudioContext - isso é seguro porque está respondendo a uma interação do usuário
+    initAudioContext();
+    
+    // Solicitar permissão de notificação se ainda não solicitada
+    if ('Notification' in window && settings.soundEnabled && Notification.permission === 'default') {
+      requestNotificationPermission();
+    }
+    
     if (!isActive) {
       targetEndTimeRef.current = Date.now() + timerStateRef.current.time * 1000;
     }
     setIsActive(true);
-  }, [isActive]);
+  }, [isActive, settings.soundEnabled, unlockAudio, requestNotificationPermission, initAudioContext]);
   
   const pauseTimer = useCallback(() => {
     setIsActive(false);
+    
+    // Limpar o tempo armazenado no localStorage
+    try {
+      localStorage.removeItem('timerEndTime');
+    } catch (error) {
+      // Ignorar erro
+    }
   }, []);
   
   const resetTimer = useCallback(() => {
@@ -372,6 +618,13 @@ export default function useTimer() {
     if (intervalRef.current) {
       cancelAnimationFrame(intervalRef.current);
       intervalRef.current = null;
+    }
+    
+    // Limpar o tempo armazenado no localStorage
+    try {
+      localStorage.removeItem('timerEndTime');
+    } catch (error) {
+      // Ignorar erro
     }
     
     const currentState = timerStateRef.current;
@@ -403,6 +656,13 @@ export default function useTimer() {
     if (intervalRef.current) {
       cancelAnimationFrame(intervalRef.current);
       intervalRef.current = null;
+    }
+    
+    // Limpar o tempo armazenado no localStorage
+    try {
+      localStorage.removeItem('timerEndTime');
+    } catch (error) {
+      // Ignorar erro
     }
     
     const currentState = timerStateRef.current;
@@ -475,6 +735,13 @@ export default function useTimer() {
     // Resetar o tempo alvo
     targetEndTimeRef.current = 0;
     
+    // Limpar localStorage
+    try {
+      localStorage.removeItem('timerEndTime');
+    } catch (error) {
+      // Ignorar erro
+    }
+    
     // Atualizações de estado em um setTimeout para evitar loops
     setTimeout(() => {
       // Atualizar configurações
@@ -517,6 +784,8 @@ export default function useTimer() {
     startTimer,
     pauseTimer,
     resetTimer,
-    skipToNext
+    skipToNext,
+    notificationPermission,
+    requestNotificationPermission
   };
 } 

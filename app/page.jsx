@@ -9,6 +9,7 @@ import ClickSpark from '../components/ui/ClickSpark'
 import LoadingScreen from '../components/ui/LoadingScreen'
 import useTranslation from '../i18n/useTranslation'
 import useTimer from '../hooks/useTimer'
+import MobileWarning from '../components/ui/MobileWarning'
 
 // Dynamic imports to avoid hydration errors
 const TimerDisplay = dynamic(() => import('../components/ui/TimerDisplay'), { 
@@ -258,6 +259,9 @@ export default function Home() {
                   particleBaseSize={80}
                 />
               )}
+              
+              {/* Mobile warning para alertar sobre limitações em dispositivos móveis */}
+              <MobileWarning />
               
               {!isFocusMode && (
                 <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">

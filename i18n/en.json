@@ -41,6 +41,7 @@
   "startingTimers": "Starting timers",
   "almostReady": "Almost ready...",
   "tagline": "Maximize your productivity",
+  "mobileWarning": "This version of DeepFocus doesn't play sounds in the background on mobile devices yet. We're working on fixing this in future updates.",
 
   "onboarding": {
     "welcome": "Welcome to DeepFocus!",

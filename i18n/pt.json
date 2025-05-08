@@ -41,6 +41,7 @@
   "startingTimers": "Iniciando temporizadores",
   "almostReady": "Quase pronto...",
   "tagline": "Maximize sua produtividade",
+  "mobileWarning": "Esta versão do DeepFocus ainda não reproduz som em segundo plano no celular. Estamos trabalhando para resolver isso em futuras atualizações.",
 
   "onboarding": {
     "welcome": "Bem-vindo ao DeepFocus!",
