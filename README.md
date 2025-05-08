@@ -32,7 +32,7 @@ A técnica Pomodoro é um método de gerenciamento de tempo que utiliza período
 
 - **Versão Desktop (Web)**: Funcionalidade completa incluindo notificações sonoras e de sistema mesmo quando a aba está em segundo plano ou o navegador minimizado.
 
-- **Versão Mobile**: Devido a limitações impostas pelos navegadores móveis para economia de bateria e performance, atualmente **não é possível reproduzir sons em segundo plano** quando o aplicativo não está em foco ou o dispositivo está bloqueado.
+- **Versão Mobile**: A reprodução de notificações em segundo plano pode variar entre dispositivos móveis na versão atual. O comportamento depende do navegador e das configurações de economia de energia de cada dispositivo.
 
 ### Roadmap para Versão Mobile
 
