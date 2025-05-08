@@ -26,6 +26,28 @@ A técnica Pomodoro é um método de gerenciamento de tempo que utiliza período
 - 🔍 **Modo Tela Cheia**: Elimine distrações e foque apenas no temporizador
 - 💾 **Persistência**: Suas configurações são salvas automaticamente
 
+## ⚠️ Limitações e Planos Futuros
+
+### Versão Desktop vs Mobile
+
+- **Versão Desktop (Web)**: Funcionalidade completa incluindo notificações sonoras e de sistema mesmo quando a aba está em segundo plano ou o navegador minimizado.
+
+- **Versão Mobile**: Devido a limitações impostas pelos navegadores móveis para economia de bateria e performance, atualmente **não é possível reproduzir sons em segundo plano** quando o aplicativo não está em foco ou o dispositivo está bloqueado.
+
+### Roadmap para Versão Mobile
+
+Estamos trabalhando para resolver as limitações da versão mobile em futuras atualizações:
+
+- Desenvolvimento de um aplicativo nativo dedicado para iOS e Android
+- Implementação de notificações push para contornar as restrições de áudio em segundo plano
+- Otimizações de consumo de bateria mantendo a funcionalidade completa
+
+### Compatibilidade
+
+Para a melhor experiência com o DeepFocus, recomendamos:
+- **Dispositivos desktop/laptop**: Chrome, Firefox, Edge ou Safari recentes
+- **Dispositivos móveis**: Usar com a tela ativa, até que as atualizações futuras resolvam as limitações de áudio em segundo plano
+
 ## 🛠️ Tecnologias
 
 - **[React 18](https://reactjs.org/)**: Biblioteca JavaScript para construção de interfaces
@@ -33,6 +55,8 @@ A técnica Pomodoro é um método de gerenciamento de tempo que utiliza período
 - **[Tailwind CSS](https://tailwindcss.com/)**: Framework CSS para design rápido e responsivo
 - **[Framer Motion](https://www.framer.com/motion/)**: Biblioteca para animações fluidas
 - **[LocalStorage API](https://developer.mozilla.org/pt-BR/docs/Web/API/Window/localStorage)**: Para persistência de dados do usuário
+- **[Web Audio API](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Audio_API)**: Para reprodução de áudio confiável em segundo plano
+- **[Notifications API](https://developer.mozilla.org/pt-BR/docs/Web/API/Notifications_API)**: Para notificações do sistema
 
 ## ⌨️ Atalhos de Teclado
 
