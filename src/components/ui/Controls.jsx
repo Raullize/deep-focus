@@ -118,4 +118,4 @@ const Controls = ({ isActive, onStart, onPause, onReset, onSkip, onSettings, onF
   );
 };
 
-export default Controls; 
+export default Controls;

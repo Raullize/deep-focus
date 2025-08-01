@@ -201,4 +201,4 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
   );
 };
 
-export default OnboardingStepper; 
+export default OnboardingStepper;

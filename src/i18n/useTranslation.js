@@ -39,4 +39,4 @@ export default function useTranslation() {
   }
   
   return { t, language, isInitialized }
-} 
+}
