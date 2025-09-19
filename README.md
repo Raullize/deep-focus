@@ -2,10 +2,8 @@
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](./README.en.md)
 
-<div align="center">
-  <img src="public/favicon.ico" alt="DeepFocus Logo" width="120" height="120" />
-  <p><em>Maximize sua produtividade e foco</em></p>
-</div>
+<img src="public/logos/logo.png" alt="DeepFocus Logo" width="200" height="200" />
+
 
 ## 📋 Sobre
 

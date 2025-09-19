@@ -2,10 +2,7 @@
 
 [![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](./README.md)
 
-<div align="center">
-  <img src="public/favicon.ico" alt="DeepFocus Logo" width="120" height="120" />
-  <p><em>Maximize your productivity and focus</em></p>
-</div>
+<img src="public/logos/logo.png" alt="DeepFocus Logo" width="200" height="200" />
 
 ## 📋 About
 
@@ -129,4 +126,4 @@ yarn test
 
 ## 🙏 Acknowledgements
 
-- Thank you to everyone who uses this application to improve their productivity 
+- Thank you to everyone who uses this application to improve their productivity
