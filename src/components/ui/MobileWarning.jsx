@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import useTranslation from '../../i18n/useTranslation'
 
-// Constante para definir o tempo de expiração em dias
 const WARNING_EXPIRATION_DAYS = 7;
 
 export default function MobileWarning() {
@@ -13,7 +12,6 @@ export default function MobileWarning() {
   const { t } = useTranslation()
 
   useEffect(() => {
-    // Detectar se é um dispositivo móvel
     const checkMobile = () => {
       const userAgent = navigator.userAgent.toLowerCase()
       const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
@@ -22,28 +20,22 @@ export default function MobileWarning() {
       return isMobileDevice || isNarrowScreen
     }
 
-    // Verificar o localStorage para ver se o aviso já foi dispensado e se não expirou
     const checkDismissed = () => {
       try {
         const dismissedData = localStorage.getItem('mobileWarningSeen');
         
-        // Se não há registro, nunca foi dispensado
         if (!dismissedData) return false;
         
-        // Tentar obter o objeto com timestamp
         try {
           const data = JSON.parse(dismissedData);
           const dismissedTime = new Date(data.timestamp);
           const now = new Date();
           
-          // Calcular diferença em dias
           const differenceInTime = now.getTime() - dismissedTime.getTime();
           const differenceInDays = differenceInTime / (1000 * 3600 * 24);
           
-          // Retornar true se ainda estiver dentro do período de dispensa
           return differenceInDays < WARNING_EXPIRATION_DAYS;
         } catch (e) {
-          // Se não for um JSON válido (formato antigo), considerar expirado
           return false;
         }
       } catch (e) {
@@ -68,14 +60,12 @@ export default function MobileWarning() {
   const dismissWarning = () => {
     setDismissed(true)
     try {
-      // Armazenar com timestamp para expiração
       const dismissData = {
         timestamp: new Date().toISOString(),
         dismissed: true
       };
       localStorage.setItem('mobileWarningSeen', JSON.stringify(dismissData));
     } catch (e) {
-      // Ignorar erro de localStorage
     }
   }
 
@@ -106,4 +96,4 @@ export default function MobileWarning() {
       </div>
     </motion.div>
   )
-} 
+}

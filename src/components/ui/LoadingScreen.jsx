@@ -5,8 +5,7 @@ import { motion } from 'framer-motion'
 import GradientText from './GradientText'
 import useTranslation from '../../i18n/useTranslation'
 
-// Mantendo consistência com as cores da aplicação
-const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"] // Blue, Purple, Pink
+const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"]
 
 const LoadingScreen = ({ onLoadingComplete }) => {
   const { t, language } = useTranslation()
@@ -17,27 +16,20 @@ const LoadingScreen = ({ onLoadingComplete }) => {
   useEffect(() => {
     let interval;
     
-    // Simulação de carregamento - aumenta gradualmente de 0 a 100
     const incrementProgress = () => {
       setProgress(prev => {
-        // Começar devagar, depois acelerar e depois desacelerar novamente
         const increment = 
           prev < 30 ? Math.random() * 3 : 
           prev < 70 ? Math.random() * 5 : 
           Math.random() * 2.5
         
-        // Certifique-se de que ele termine em 100
         const nextProgress = Math.min(prev + increment, 100)
         
-        // Quando atingir 85%, inicie a pré-carga dos componentes principais
         if (nextProgress >= 85 && !preloadStarted) {
           setPreloadStarted(true)
           
-          // Comece a carregar os componentes principais aqui
-          // Isso é apenas para sincronizar os timings
           const preloadScripts = document.createElement('script')
           preloadScripts.textContent = `
-            // Inicia a pré-carga dos componentes UI
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('preloadUIComponents'));
             }
@@ -45,23 +37,20 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           document.head.appendChild(preloadScripts)
         }
         
-        // Quando chegar a 100, agende a finalização do loading após um pequeno delay
         if (nextProgress === 100 && prev !== 100) {
           setTimeout(() => {
             setIsLoading(false)
             if (onLoadingComplete) {
               setTimeout(onLoadingComplete, 200)
             }
-          }, 300) // Tempo para ver o 100% completo
+          }, 300)
         }
         
         return nextProgress
       })
     }
 
-    // Começa com um pequeno atraso para garantir que pelo menos a tela de loading seja vista
     const startDelay = setTimeout(() => {
-      // Depois, inicia a atualização do progresso em intervalos
       interval = setInterval(incrementProgress, 30)
     }, 200)
 
@@ -71,7 +60,6 @@ const LoadingScreen = ({ onLoadingComplete }) => {
     }
   }, [onLoadingComplete, preloadStarted])
 
-  // Se não estiver mais carregando, retorna null para não renderizar nada
   if (!isLoading) return null
 
   return (
@@ -83,7 +71,6 @@ const LoadingScreen = ({ onLoadingComplete }) => {
       data-loading-screen="true"
     >
       <div className="w-full max-w-md px-8 flex flex-col items-center">
-        {/* Logo ou Título com GradientText */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -91,7 +78,6 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           className="mb-10 w-full"
         >
           <div className="text-center">
-            {/* Logo da aplicação */}
             <motion.img 
               src="/logos/logo.png" 
               alt="DeepFocus Logo" 
@@ -101,7 +87,6 @@ const LoadingScreen = ({ onLoadingComplete }) => {
               transition={{ duration: 0.6, delay: 0.2 }}
               onError={(e) => { 
                 e.target.style.display = 'none';
-                // Se a logo falhar, mostra apenas o texto
               }}
             />
             <GradientText 
@@ -115,9 +100,7 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           </div>
         </motion.div>
         
-        {/* Container para barra de progresso e textos */}
         <div className="w-full">
-          {/* Barra de progresso */}
           <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
             <motion.div 
               className="h-full rounded-full"
@@ -130,7 +113,6 @@ const LoadingScreen = ({ onLoadingComplete }) => {
             />
           </div>
           
-          {/* Container para texto e porcentagem - implementação simplificada */}
           <table className="w-full mb-8">
             <tbody>
               <tr>

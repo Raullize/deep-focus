@@ -6,9 +6,9 @@ const CIRCLE_RADIUS = 116
 const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS
 
 const GRADIENT_COLORS = {
-  focus: ["#3B82F6", "#8B5CF6", "#EC4899"], // Blue to Purple to Pink
-  shortBreak: ["#10B981", "#059669", "#047857"], // Green shades
-  longBreak: ["#6366F1", "#4F46E5", "#4338CA"], // Indigo shades
+  focus: ["#3B82F6", "#8B5CF6", "#EC4899"],
+  shortBreak: ["#10B981", "#059669", "#047857"],
+  longBreak: ["#6366F1", "#4F46E5", "#4338CA"],
 }
 
 const TimerDisplay = ({ time, totalTime, mode }) => {
@@ -19,12 +19,10 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
   const progressPercentage = totalTime > 0 ? (time / totalTime) * 100 : 0
   const colors = GRADIENT_COLORS[mode] || GRADIENT_COLORS.focus
 
-  // Efeito para marcar o componente como renderizado após montagem
   useEffect(() => {
     setRendered(true)
   }, [])
 
-  // Atualiza o tempo exibido quando o time mudar
   useEffect(() => {
     const safeTime = typeof time === 'number' && !isNaN(time) ? time : 1500
     const roundedTime = Math.ceil(safeTime)
@@ -42,7 +40,6 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
     setDisplayTime(formatted)
   }, [time])
 
-  // Atualiza o círculo de progresso diretamente via DOM para melhor performance
   useEffect(() => {
     if (circleRef.current && rendered) {
       circleRef.current.style.strokeDashoffset = CIRCUMFERENCE * (1 - progressPercentage / 100)
@@ -106,4 +103,4 @@ const TimerDisplay = ({ time, totalTime, mode }) => {
   )
 }
 
-export default TimerDisplay 
+export default TimerDisplay

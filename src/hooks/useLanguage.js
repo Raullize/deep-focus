@@ -7,10 +7,8 @@ const LanguageContext = createContext(null)
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('pt')
   const [isInitialized, setIsInitialized] = useState(false)
-  // Flag para controlar se está na fase de hidratação
   const [isHydrating, setIsHydrating] = useState(true)
 
-  // Efeito para carregar o idioma do localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -18,9 +16,7 @@ export function LanguageProvider({ children }) {
         if (savedLanguage && ['pt', 'en'].includes(savedLanguage)) {
           setLanguage(savedLanguage)
         }
-        // Marca como inicializado para evitar flickering
         setIsInitialized(true)
-        // Marca que a hidratação inicial foi concluída
         setIsHydrating(false)
       } catch (error) {
         console.error('Error accessing localStorage:', error)
@@ -30,12 +26,10 @@ export function LanguageProvider({ children }) {
     }
   }, [])
 
-  // Efeito para salvar o idioma no localStorage sempre que mudar
   useEffect(() => {
     if (typeof window !== 'undefined' && isInitialized && !isHydrating) {
       try {
         localStorage.setItem('language', language)
-        // Só atualiza o atributo lang depois da hidratação inicial
         document.documentElement.lang = language
       } catch (error) {
         console.error('Error saving to localStorage:', error)
@@ -60,4 +54,4 @@ export function useLanguage() {
     throw new Error('useLanguage must be used within a LanguageProvider')
   }
   return context
-} 
+}

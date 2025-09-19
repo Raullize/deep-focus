@@ -11,7 +11,6 @@ import useTranslation from '../i18n/useTranslation'
 import useTimer from '../hooks/useTimer'
 import MobileWarning from '../components/ui/MobileWarning'
 
-// Dynamic imports to avoid hydration errors
 const TimerDisplay = dynamic(() => import('../components/ui/TimerDisplay'), { 
   ssr: false,
   loading: () => <div className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px]"></div>
@@ -20,13 +19,11 @@ const ConfigPanel = dynamic(() => import('../components/ui/ConfigPanel'), { ssr:
 const Particles = dynamic(() => import('../components/ui/Particles'), { ssr: false })
 const OnboardingStepper = dynamic(() => import('../components/OnboardingStepper'), { ssr: false })
 
-const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"] // Blue, Purple, Pink
+const PARTICLE_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"]
 
-// Adicione este estilo para evitar o flash inicial
 function InitialLoadingStyle() {
   return (
     <style jsx global>{`
-      /* Esconde o conteúdo até que o JavaScript inicialize */
       html.loading-app {
         background-color: #111827;
       }
@@ -37,7 +34,6 @@ function InitialLoadingStyle() {
         display: none !important;
       }
       
-      /* Apenas mostra o componente de loading */
       html.loading-app [data-loading-screen="true"] {
         display: flex !important;
       }
@@ -46,7 +42,6 @@ function InitialLoadingStyle() {
         display: revert !important;
       }
 
-      /* Animação de fade in para a aplicação principal */
       @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -83,20 +78,16 @@ export default function Home() {
     skipToNext
   } = useTimer()
 
-  // Variável para controlar se o timer está pré-carregado
   const [timerPreloaded, setTimerPreloaded] = useState(false)
 
-  // Adicionamos a classe loading-app ao html quando o componente é montado
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.add('loading-app');
     }
     
-    // Inicializa como mounted após um pequeno delay
     const timer = setTimeout(() => {
       setMounted(true);
       
-      // Preload do TimerDisplay em segundo plano
       const preloadTimer = setTimeout(() => {
         setTimerPreloaded(true);
       }, 200);
@@ -107,7 +98,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Responder ao evento de pré-carregamento disparado pelo LoadingScreen
   useEffect(() => {
     if (!mounted) return;
     
@@ -122,7 +112,6 @@ export default function Home() {
     };
   }, [mounted]);
 
-  // Quando o loading terminar, remova a classe loading-app
   const handleLoadingComplete = () => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.remove('loading-app');
@@ -203,7 +192,6 @@ export default function Home() {
     }
   }
 
-  // Se não estiver montado, renderiza apenas o estilo inicial
   if (!mounted) {
     return <InitialLoadingStyle />;
   }
@@ -212,15 +200,14 @@ export default function Home() {
     <>
       <InitialLoadingStyle />
       
-      {/* Elemento oculto para pré-renderizar o TimerDisplay durante o carregamento */}
-      <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', visibility: 'hidden' }}>
-        {timerPreloaded && (
-          <TimerDisplay 
-            time={time} 
-            totalTime={totalTime}
-            mode={mode}
-          />
-        )}
+      <div style={{ position: 'absolute', left: '-9999px', visibility: 'hidden' }}>
+        <TimerDisplay 
+          time={time} 
+          totalTime={totalTime} 
+          mode={mode} 
+          isActive={isActive}
+          isFocusMode={false}
+        />
       </div>
       
       {isLoading && (
@@ -239,11 +226,10 @@ export default function Home() {
             multiColor={true}
           >
             <main className="flex h-screen w-screen flex-col items-center justify-between p-6 relative overflow-hidden">
-              {/* Componente Onboarding - mostrado na primeira visita ou quando showOnboarding é true */}
-              {mounted && (
+              {showOnboarding && (
                 <OnboardingStepper 
-                  forceShow={showOnboarding} 
-                  onComplete={() => setShowOnboarding(false)}
+                  onComplete={handleOnboardingComplete}
+                  onSkip={handleOnboardingComplete}
                 />
               )}
               
@@ -260,7 +246,6 @@ export default function Home() {
                 />
               )}
               
-              {/* Mobile warning para alertar sobre limitações em dispositivos móveis */}
               <MobileWarning />
               
               {!isFocusMode && (

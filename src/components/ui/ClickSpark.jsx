@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
-const DEFAULT_SPARK_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"]; // Blue, Purple, Pink
+const DEFAULT_SPARK_COLORS = ["#3B82F6", "#8B5CF6", "#EC4899"];
 
 const ClickSpark = ({
   sparkColor = "#fff",
@@ -18,7 +18,6 @@ const ClickSpark = ({
   const sparksRef = useRef([]);
   const startTimeRef = useRef(null);
 
-  // Setup canvas dimensions and responsive behavior
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -52,7 +51,6 @@ const ClickSpark = ({
     };
   }, []);
 
-  // Easing function for spark animation
   const easeFunc = useCallback((t) => {
     switch (easing) {
       case "linear":
@@ -62,11 +60,10 @@ const ClickSpark = ({
       case "ease-in-out":
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
       default:
-        return t * (2 - t); // ease-out
+        return t * (2 - t);
     }
   }, [easing]);
 
-  // Draw animation frames
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -120,7 +117,6 @@ const ClickSpark = ({
     return () => cancelAnimationFrame(animationId);
   }, [sparkColor, sparkSize, sparkRadius, duration, easeFunc, extraScale, multiColor]);
 
-  // Handle clicks and create sparks
   const handleClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -156,4 +152,4 @@ const ClickSpark = ({
   );
 };
 
-export default ClickSpark; 
+export default ClickSpark;

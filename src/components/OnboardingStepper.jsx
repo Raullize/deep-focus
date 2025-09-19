@@ -30,7 +30,6 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
     try {
       localStorage.setItem('hasSeenOnboarding', 'true');
     } catch (error) {
-      // Silently fail if localStorage is not available
     }
     setIsOpen(false);
     if (onComplete) onComplete();
