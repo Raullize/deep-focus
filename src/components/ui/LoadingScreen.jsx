@@ -91,6 +91,19 @@ const LoadingScreen = ({ onLoadingComplete }) => {
           className="mb-10 w-full"
         >
           <div className="text-center">
+            {/* Logo da aplicação */}
+            <motion.img 
+              src="/logos/logo.png" 
+              alt="DeepFocus Logo" 
+              className="w-20 h-20 mx-auto mb-4 object-contain"
+              initial={{ rotate: -10, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              onError={(e) => { 
+                e.target.style.display = 'none';
+                // Se a logo falhar, mostra apenas o texto
+              }}
+            />
             <GradientText 
               className="text-4xl font-bold" 
               colors={PARTICLE_COLORS}
@@ -153,4 +166,4 @@ const LoadingScreen = ({ onLoadingComplete }) => {
   )
 }
 
-export default LoadingScreen 
+export default LoadingScreen

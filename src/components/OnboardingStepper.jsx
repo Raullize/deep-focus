@@ -55,9 +55,9 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold text-primary mb-4">{t('onboarding.welcome')}</h2>
             <img 
-              src="/illustrations/pomodoro.svg" 
-              alt="Pomodoro Timer" 
-              className="w-32 h-32 mb-4"
+              src="/logos/logo.png" 
+              alt="DeepFocus Logo" 
+              className="w-32 h-32 mb-4 object-contain"
               onError={(e) => { e.target.src = '/favicon.ico'; e.target.className = "w-16 h-16 mb-4"; }}
             />
             <p className="text-center mb-2">
