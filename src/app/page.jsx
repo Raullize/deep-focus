@@ -119,6 +119,10 @@ export default function Home() {
     setIsLoading(false);
   };
 
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   useEffect(() => {
     if (!mounted) return
     
