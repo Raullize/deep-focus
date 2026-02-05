@@ -49,6 +49,8 @@ const OnboardingStepper = ({ onComplete, forceShow = false }) => {
       <Stepper
         onFinalStepCompleted={handleComplete}
         stepCircleContainerClassName="max-w-lg"
+        backButtonText={t('back')}
+        nextButtonText={t('continue')}
       >
         <Step>
           <div className="flex flex-col items-center">

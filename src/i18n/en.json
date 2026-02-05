@@ -22,6 +22,8 @@
   "spaceKey": "Space",
   "startPause": "Start/Pause",
   "next": "Next",
+  "back": "Back",
+  "continue": "Continue",
   "shortcuts": "Keyboard Shortcuts",
   "resetToDefaults": "Reset to Defaults",
   "autoStartNextCycle": "Auto-Start Next Cycle",
@@ -42,6 +44,21 @@
   "almostReady": "Almost ready...",
   "tagline": "Maximize your productivity",
   "mobileWarning": "Background notifications may vary between mobile devices in the current version. Future updates aim to make this compatibility more stable.",
+
+  "sounds": {
+    "notification1": "Notification 1",
+    "notification2": "Notification 2",
+    "notification3": "Notification 3",
+    "notification4": "Notification 4",
+    "notification5": "Notification 5",
+    "notification6": "Notification 6",
+    "notification7": "Notification 7",
+    "notification8": "Notification 8",
+    "notification9": "Notification 9",
+    "notification10": "Notification 10",
+    "notification11": "Notification 11",
+    "notification12": "Notification 12"
+  },
 
   "onboarding": {
     "welcome": "Welcome to DeepFocus!",

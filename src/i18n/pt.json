@@ -22,6 +22,8 @@
   "spaceKey": "Espaço",
   "startPause": "Iniciar/Pausar",
   "next": "Próximo",
+  "back": "Voltar",
+  "continue": "Continuar",
   "shortcuts": "Atalhos de Teclado",
   "resetToDefaults": "Restaurar Padrões",
   "autoStartNextCycle": "Iniciar Próximo Ciclo Automaticamente",
@@ -42,6 +44,21 @@
   "almostReady": "Quase pronto...",
   "tagline": "Maximize sua produtividade",
   "mobileWarning": "A reprodução de notificações em segundo plano pode variar entre dispositivos móveis na versão atual. Futuras atualizações buscam deixar essa compatibilidade mais estável.",
+  
+  "sounds": {
+    "notification1": "Notificação 1",
+    "notification2": "Notificação 2",
+    "notification3": "Notificação 3",
+    "notification4": "Notificação 4",
+    "notification5": "Notificação 5",
+    "notification6": "Notificação 6",
+    "notification7": "Notificação 7",
+    "notification8": "Notificação 8",
+    "notification9": "Notificação 9",
+    "notification10": "Notificação 10",
+    "notification11": "Notificação 11",
+    "notification12": "Notificação 12"
+  },
 
   "onboarding": {
     "welcome": "Bem-vindo ao DeepFocus!",

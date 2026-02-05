@@ -17,24 +17,26 @@ const DEFAULT_SETTINGS = {
 }
 
 // Lista de sons disponíveis
-const NOTIFICATION_SOUNDS = [
-  { id: 'notification1', name: 'Notificação 1' },
-  { id: 'notification10', name: 'Notificação 2' },
-  { id: 'notification11', name: 'Notificação 3' },
-  { id: 'notification12', name: 'Notificação 4' },
-  { id: 'notification2', name: 'Notificação 5' },
-  { id: 'notification3', name: 'Notificação 6' },
-  { id: 'notification4', name: 'Notificação 7' },
-  { id: 'notification5', name: 'Notificação 8' },
-  { id: 'notification6', name: 'Notificação 9' },
-  { id: 'notification7', name: 'Notificação 10' },
-  { id: 'notification8', name: 'Notificação 11' },
-  { id: 'notification9', name: 'Notificação 12' },
-]
+// Será gerada dinamicamente dentro do componente para suportar i18n
 
 const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
   const { t } = useTranslation()
   const audioRef = useRef(null)
+  
+  const notificationSounds = [
+    { id: 'notification1', name: t('sounds.notification1') },
+    { id: 'notification2', name: t('sounds.notification2') },
+    { id: 'notification3', name: t('sounds.notification3') },
+    { id: 'notification4', name: t('sounds.notification4') },
+    { id: 'notification5', name: t('sounds.notification5') },
+    { id: 'notification6', name: t('sounds.notification6') },
+    { id: 'notification7', name: t('sounds.notification7') },
+    { id: 'notification8', name: t('sounds.notification8') },
+    { id: 'notification9', name: t('sounds.notification9') },
+    { id: 'notification10', name: t('sounds.notification10') },
+    { id: 'notification11', name: t('sounds.notification11') },
+    { id: 'notification12', name: t('sounds.notification12') },
+  ]
   
   // Estado para controlar o modal de confirmação de reset
   const [isResetModalOpen, setIsResetModalOpen] = useState(false)
@@ -214,7 +216,7 @@ const ConfigPanel = ({ isOpen, onClose, settings, onUpdateSettings }) => {
                   value={localSettings.notificationSound}
                   onChange={(value) => handleSelectChange('notificationSound', value)}
                   onTest={handleTestSound}
-                  options={NOTIFICATION_SOUNDS}
+                  options={notificationSounds}
                 />
               )}
               
