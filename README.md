@@ -1,9 +1,6 @@
 # DeepFocus - Pomodoro Timer
 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](./README.en.md)
-
 <img src="public/logos/logo.png" alt="DeepFocus Logo" width="200" height="200" />
-
 
 ## 📋 Sobre
 
@@ -76,7 +73,7 @@ Estas instruções permitirão que você obtenha uma cópia do projeto em opera�
 ### Pré-requisitos
 
 - Node.js (versão 14.x ou superior)
-- npm ou yarn
+- npm
 
 ### Instalação
 
@@ -87,39 +84,13 @@ cd deep-focus
 
 # Instale as dependências
 npm install
-# ou
-yarn install
 
 # Inicie o servidor de desenvolvimento
 npm run dev
-# ou
-yarn dev
+
 ```
 
 Acesse `http://localhost:3000` no seu navegador para ver o aplicativo em execução.
-
-### Construindo para produção
-
-```bash
-# Gere a build de produção
-npm run build
-# ou
-yarn build
-
-# Inicie o servidor de produção
-npm start
-# ou
-yarn start
-```
-
-## 🧪 Testes
-
-```bash
-# Execute os testes
-npm run test
-# ou
-yarn test
-```
 
 ## 🧑‍💻 Autor
 
