@@ -234,6 +234,7 @@ export default function Home() {
                 <OnboardingStepper 
                   onComplete={handleOnboardingComplete}
                   onSkip={handleOnboardingComplete}
+                  forceShow={true}
                 />
               )}
               
